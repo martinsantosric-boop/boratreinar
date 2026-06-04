@@ -74,13 +74,35 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   }
 
   Future<void> _executarAberturaMascote() async {
-    if (!_mascoteController.value.isInitialized) return;
+    // Garantir que o vídeo está inicializado
+    if (!_mascoteController.value.isInitialized) {
+      print('⚠️ Vídeo não inicializado. Tentando inicializar...');
+      try {
+        await _mascoteController.initialize();
+        if (!mounted) return;
+      } catch (e) {
+        print('❌ Erro ao inicializar vídeo: $e');
+        return; // Se falhar, continua sem o vídeo
+      }
+    }
 
+    print('✅ Iniciando animação do mascote');
     setState(() => _mostrarMascote = true);
 
-    await _mascoteController.seekTo(Duration.zero);
-    await _mascoteController.play();
-    await _apitoPlayer.play(AssetSource('apito.mp3'));
+    try {
+      await _mascoteController.seekTo(Duration.zero);
+      await _mascoteController.play();
+      print('✅ Vídeo tocando');
+    } catch (e) {
+      print('❌ Erro ao tocar vídeo: $e');
+    }
+
+    try {
+      await _apitoPlayer.play(AssetSource('apito.mp3'));
+      print('✅ Apito tocando');
+    } catch (e) {
+      print('❌ Erro ao tocar apito: $e');
+    }
 
     await Future.delayed(const Duration(seconds: 3));
 
@@ -88,6 +110,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
 
     await _mascoteController.pause();
     setState(() => _mostrarMascote = false);
+    print('✅ Animação do mascote concluída');
   }
 
   Future<void> _start() async {
@@ -318,15 +341,37 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
           ),
           if (_mostrarMascote)
             Positioned.fill(
-              child: IgnorePointer(
+              child: Container(
+                color: Colors.black.withValues(alpha: 0.85),
                 child: Center(
-                  child: SizedBox(
-                    width: 300,
-                    height: 300,
-                    child: _mascoteController.value.isInitialized
-                        ? VideoPlayer(_mascoteController)
-                        : const SizedBox.shrink(),
-                  ),
+                  child: _mascoteController.value.isInitialized
+                      ? SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: MediaQuery.of(context).size.width * 0.9,
+                          child: FittedBox(
+                            fit: BoxFit.contain,
+                            child: SizedBox(
+                              width: _mascoteController.value.size.width,
+                              height: _mascoteController.value.size.height,
+                              child: VideoPlayer(_mascoteController),
+                            ),
+                          ),
+                        )
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const CircularProgressIndicator(
+                              color: Colors.white,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Carregando animação...',
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
                 ),
               ),
             ),
