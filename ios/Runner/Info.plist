@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Cooper Maratonista</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>cooper_maratonista</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>O app pode usar Bluetooth para conectar sensores esportivos externos, como cinta cardiaca e relogio.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>O app pode ler dados de saude autorizados para acompanhar treinos, passos e frequencia cardiaca.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>O app pode salvar treinos autorizados no app Saude.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>O app usa sua localizacao durante a corrida para calcular distancia, pace e rota, inclusive se a tela for bloqueada.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>O app usa sua localizacao durante a corrida para manter o rastreamento quando autorizado.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>O app usa sua localizacao para calcular distancia, pace e rota durante a corrida.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>O app usa sensores de movimento para melhorar dados de corrida, passos, cadencia e orientacao.</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(FLUTTER_BUILD_NAME)</string>
+	<key>CFBundleSignature</key>
+	<string>????</string>
+	<key>CFBundleVersion</key>
+	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>UILaunchStoryboardName</key>
+	<string>LaunchScreen</string>
+	<key>UIMainStoryboardFile</key>
+	<string>Main</string>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>UISupportedInterfaceOrientations~ipad</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+		<string>UIInterfaceOrientationPortraitUpsideDown</string>
+		<string>UIInterfaceOrientationLandscapeLeft</string>
+		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>bluetooth-central</string>
+		<string>processing</string>
+	</array>
+</dict>
+</plist>
