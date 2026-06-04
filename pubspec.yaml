@@ -42,6 +42,7 @@ dependencies:
   supabase_flutter: ^2.12.4
   web: ^1.1.1
   video_player: ^2.8.0
+  audioplayers: ^6.6.0
 
 dev_dependencies:
   flutter_test:
@@ -67,6 +68,8 @@ flutter:
 
   # Assets do Bolt
   assets:
+    - assets/apito.mp3
+    - assets/bolt/abertura_mascote.mp4
     - assets/bolt/boratreinargift.mp4
     - assets/bolt/expressions/
     - assets/bolt/leagues/

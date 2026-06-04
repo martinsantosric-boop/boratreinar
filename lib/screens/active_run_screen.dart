@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 import '../models/geo_sample.dart';
 import '../models/run_session.dart';
@@ -26,7 +28,9 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   final _tracker = LocationTracker();
   final _storage = RunStorageService();
   final _stepCounter = StepCounterService();
+  final _apitoPlayer = AudioPlayer();
   final _route = <GeoSample>[];
+  late final VideoPlayerController _mascoteController;
   StreamSubscription<LocationUpdate>? _locationSubscription;
   StreamSubscription<int>? _stepSubscription;
   Timer? _timer;
@@ -37,6 +41,19 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   int _stepsBeforeCurrentSegment = 0;
   RunStatus _status = RunStatus.ready;
   String? _message;
+  var _mostrarMascote = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _mascoteController = VideoPlayerController.asset(
+      'assets/bolt/abertura_mascote.mp4',
+    );
+    _mascoteController.initialize().then((_) {
+      if (!mounted) return;
+      setState(() {});
+    });
+  }
 
   @override
   void dispose() {
@@ -45,7 +62,32 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
     _stepSubscription?.cancel();
     _tracker.stop();
     _stepCounter.stop();
+    _mascoteController.dispose();
+    _apitoPlayer.dispose();
     super.dispose();
+  }
+
+  Future<void> _startWithMascote() async {
+    await _executarAberturaMascote();
+    if (!mounted) return;
+    await _start();
+  }
+
+  Future<void> _executarAberturaMascote() async {
+    if (!_mascoteController.value.isInitialized) return;
+
+    setState(() => _mostrarMascote = true);
+
+    await _mascoteController.seekTo(Duration.zero);
+    await _mascoteController.play();
+    await _apitoPlayer.play(AssetSource('apito.mp3'));
+
+    await Future.delayed(const Duration(seconds: 3));
+
+    if (!mounted) return;
+
+    await _mascoteController.pause();
+    setState(() => _mostrarMascote = false);
   }
 
   Future<void> _start() async {
@@ -162,110 +204,133 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Corrida ativa')),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      body: Stack(
         children: [
-          Card(
-            color: Theme.of(context).colorScheme.primary,
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    formatDuration(_elapsed),
-                    style: Theme.of(context).textTheme.displayMedium?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                    ),
+          ListView(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            children: [
+              Card(
+                color: Theme.of(context).colorScheme.primary,
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        formatDuration(_elapsed),
+                        style: Theme.of(context).textTheme.displayMedium
+                            ?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                            ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        _status == RunStatus.running
+                            ? 'Mantenha o ritmo'
+                            : _status == RunStatus.paused
+                            ? 'Pausado'
+                            : 'Aguardando inicio',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.88),
+                            ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    _status == RunStatus.running
-                        ? 'Mantenha o ritmo'
-                        : _status == RunStatus.paused
-                        ? 'Pausado'
-                        : 'Aguardando inicio',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.88),
-                    ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              GridView.count(
+                crossAxisCount: 2,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                childAspectRatio: 1.18,
+                children: [
+                  MetricTile(
+                    label: 'Distancia',
+                    value: formatDistance(_distanceMeters),
+                    icon: Icons.route,
+                  ),
+                  MetricTile(
+                    label: 'Pace medio',
+                    value: formatPace(pace),
+                    icon: Icons.speed,
+                  ),
+                  MetricTile(
+                    label: 'Velocidade',
+                    value: !hasReliableDistance || _elapsed.inSeconds == 0
+                        ? '--'
+                        : '${previewRun.averageSpeedKmh.toStringAsFixed(1)} km/h',
+                    icon: Icons.bolt,
+                  ),
+                  MetricTile(
+                    label: 'Passos',
+                    value: '$_steps',
+                    icon: Icons.directions_walk,
+                  ),
+                  MetricTile(
+                    label: 'Calorias',
+                    value: '$calories kcal',
+                    icon: Icons.local_fire_department,
                   ),
                 ],
               ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          GridView.count(
-            crossAxisCount: 2,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 12,
-            childAspectRatio: 1.18,
-            children: [
-              MetricTile(
-                label: 'Distancia',
-                value: formatDistance(_distanceMeters),
-                icon: Icons.route,
-              ),
-              MetricTile(
-                label: 'Pace medio',
-                value: formatPace(pace),
-                icon: Icons.speed,
-              ),
-              MetricTile(
-                label: 'Velocidade',
-                value: !hasReliableDistance || _elapsed.inSeconds == 0
-                    ? '--'
-                    : '${previewRun.averageSpeedKmh.toStringAsFixed(1)} km/h',
-                icon: Icons.bolt,
-              ),
-              MetricTile(
-                label: 'Passos',
-                value: '$_steps',
-                icon: Icons.directions_walk,
-              ),
-              MetricTile(
-                label: 'Calorias',
-                value: '$calories kcal',
-                icon: Icons.local_fire_department,
+              const SizedBox(height: 16),
+              if (_message != null)
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.gps_fixed),
+                    title: Text(_message!),
+                    subtitle: Text(
+                      '${_route.length} pontos GPS | $_steps passos',
+                    ),
+                  ),
+                ),
+              const SizedBox(height: 20),
+              if (_status == RunStatus.ready)
+                FilledButton.icon(
+                  onPressed: _startWithMascote,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Iniciar'),
+                )
+              else if (_status == RunStatus.running)
+                FilledButton.icon(
+                  onPressed: _pause,
+                  icon: const Icon(Icons.pause),
+                  label: const Text('Pausar'),
+                )
+              else
+                FilledButton.icon(
+                  onPressed: _start,
+                  icon: const Icon(Icons.play_arrow),
+                  label: const Text('Continuar'),
+                ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                onPressed: _finish,
+                icon: const Icon(Icons.stop),
+                label: const Text('Finalizar e salvar'),
               ),
             ],
           ),
-          const SizedBox(height: 16),
-          if (_message != null)
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.gps_fixed),
-                title: Text(_message!),
-                subtitle: Text('${_route.length} pontos GPS | $_steps passos'),
+          if (_mostrarMascote)
+            Positioned.fill(
+              child: Container(
+                color: Colors.white,
+                child: Center(
+                  child: SizedBox(
+                    width: 300,
+                    height: 300,
+                    child: _mascoteController.value.isInitialized
+                        ? VideoPlayer(_mascoteController)
+                        : const SizedBox.shrink(),
+                  ),
+                ),
               ),
             ),
-          const SizedBox(height: 20),
-          if (_status == RunStatus.ready)
-            FilledButton.icon(
-              onPressed: _start,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('Iniciar'),
-            )
-          else if (_status == RunStatus.running)
-            FilledButton.icon(
-              onPressed: _pause,
-              icon: const Icon(Icons.pause),
-              label: const Text('Pausar'),
-            )
-          else
-            FilledButton.icon(
-              onPressed: _start,
-              icon: const Icon(Icons.play_arrow),
-              label: const Text('Continuar'),
-            ),
-          const SizedBox(height: 12),
-          OutlinedButton.icon(
-            onPressed: _finish,
-            icon: const Icon(Icons.stop),
-            label: const Text('Finalizar e salvar'),
-          ),
         ],
       ),
     );
