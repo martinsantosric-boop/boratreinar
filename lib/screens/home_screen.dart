@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/run_session.dart';
 import '../models/user_profile.dart';
+import '../services/auth_service.dart';
 import '../services/run_storage_service.dart';
 import '../utils/run_formatters.dart';
 import '../widgets/metric_tile.dart';
@@ -19,6 +20,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final _authService = AuthService();
   final _storage = RunStorageService();
   var _selectedIndex = 0;
   var _runs = <RunSession>[];
@@ -84,7 +86,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _saveProfile(UserProfile profile) async {
     await _storage.saveUserProfile(profile);
+    await _authService.updateProfileMetrics(profile);
     await _loadData();
+  }
+
+  Future<void> _signOut() async {
+    await _authService.signOut();
   }
 
   void _requestProfileData() {
@@ -132,6 +139,11 @@ class _HomeScreenState extends State<HomeScreen> {
             tooltip: 'Atualizar',
             onPressed: _loadData,
             icon: const Icon(Icons.refresh),
+          ),
+          IconButton(
+            tooltip: 'Sair',
+            onPressed: _signOut,
+            icon: const Icon(Icons.logout),
           ),
         ],
       ),

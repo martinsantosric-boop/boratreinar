@@ -43,8 +43,7 @@ class RunSession {
   int get estimatedCalories {
     if (distanceMeters < 50 || duration.inSeconds == 0) return 0;
     final minutes = duration.inSeconds / 60;
-    final calories =
-        _metForSpeed(averageSpeedKmh) * 3.5 * bodyWeightKg / 200;
+    final calories = _metForSpeed(averageSpeedKmh) * 3.5 * bodyWeightKg / 200;
     return (calories * minutes).round();
   }
 

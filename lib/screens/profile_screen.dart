@@ -71,11 +71,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = UserProfile(
-      bodyWeightKg: double.tryParse(
-            _weightController.text.replaceAll(',', '.'),
-          ) ??
+      bodyWeightKg:
+          double.tryParse(_weightController.text.replaceAll(',', '.')) ??
           widget.profile.bodyWeightKg,
-      heightCm: double.tryParse(_heightController.text.replaceAll(',', '.')) ??
+      heightCm:
+          double.tryParse(_heightController.text.replaceAll(',', '.')) ??
           widget.profile.heightCm,
       age: int.tryParse(_ageController.text) ?? widget.profile.age,
     );
