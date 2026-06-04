@@ -35,165 +35,221 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: Stack(
-        children: [
-          // Fundo azul escuro ocupando topo
-          Container(
-            height: size.height * 0.6,
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color(0xFF0D1B2A), // Azul escuro
-                  Color(0xFF1E3A5F), // Azul médio
-                ],
-              ),
-            ),
-          ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final viewportHeight = constraints.maxHeight;
+          final viewportWidth = constraints.maxWidth;
+          final compact = viewportHeight < 720 || viewportWidth < 420;
+          final logoFontSize = compact ? 34.0 : 42.0;
+          final sloganFontSize = compact ? 16.0 : 20.0;
+          final topHeight = (viewportHeight * (compact ? 0.56 : 0.6)).clamp(
+            compact ? 320.0 : 390.0,
+            compact ? 380.0 : 520.0,
+          );
+          final loginMinHeight = (viewportHeight - topHeight).clamp(
+            compact ? 260.0 : 300.0,
+            viewportHeight,
+          );
 
-          // Conteúdo
-          SafeArea(
-            child: Column(
-              children: [
-                // Topo com Bolt GIGANTE
-                Expanded(
-                  flex: 6,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Bolt GIGANTE
-                        const BoltLoginMedia(
-                          assetPath: 'assets/bolt/boratreinargift.mp4',
-                          size: 250, // Tamanho fixo grande
-                        ),
-                        const SizedBox(height: 24),
-                        // Logo/Nome
-                        Text(
-                          '⚡ Bora Treinar',
-                          style: theme.textTheme.displayMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 42,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        // Slogan
-                        Text(
-                          'Um passo de cada vez',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontWeight: FontWeight.w500,
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
+          return Stack(
+            children: [
+              Container(
+                height: topHeight + 24,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Color(0xFF0D1B2A), Color(0xFF1E3A5F)],
                   ),
                 ),
-
-                // Card inferior branco com login
-                Expanded(
-                  flex: 4,
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(32),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(32, 40, 32, 32),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          // Título
-                          Text(
-                            'Entre e comece sua jornada',
-                            style: theme.textTheme.headlineSmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              color: const Color(0xFF0D1B2A),
+              ),
+              SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: viewportHeight),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: topHeight,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            const BoltLoginMedia(
+                              assetPath: 'assets/bolt/boratreinargift.mp4',
+                              width: double.infinity,
+                              height: double.infinity,
+                              borderRadius: 0,
                             ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 12),
-                          // Descrição
-                          Text(
-                            'Ganhe XP, suba de liga, conquiste badges e compete com corredores do mundo todo!',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: Colors.black54,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 32),
-                          // Botão de Login
-                          FilledButton.icon(
-                            onPressed: _loading ? null : _signInWithGoogle,
-                            style: FilledButton.styleFrom(
-                              backgroundColor: const Color(0xFF0D1B2A),
-                              foregroundColor: Colors.white,
-                            ),
-                            icon: _loading
-                                ? const SizedBox(
-                                    width: 20,
-                                    height: 20,
-                                    child: CircularProgressIndicator(
-                                      strokeWidth: 2,
-                                      valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white,
-                                      ),
-                                    ),
-                                  )
-                                : const Icon(Icons.login),
-                            label: const Text('Entrar com Google'),
-                          ),
-
-                          // Erro
-                          if (_errorMessage != null) ...[
-                            const SizedBox(height: 16),
                             Container(
-                              padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
-                                color: Colors.red.shade50,
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(color: Colors.red.shade200),
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    const Color(
+                                      0xFF0D1B2A,
+                                    ).withValues(alpha: 0.2),
+                                    const Color(
+                                      0xFF0D1B2A,
+                                    ).withValues(alpha: 0.78),
+                                  ],
+                                ),
                               ),
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.error_outline,
-                                    color: theme.colorScheme.error,
-                                    size: 20,
+                            ),
+                            SafeArea(
+                              bottom: false,
+                              child: Align(
+                                alignment: Alignment.bottomCenter,
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    24,
+                                    24,
+                                    24,
+                                    compact ? 30 : 40,
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      _errorMessage!,
-                                      style: TextStyle(
-                                        color: theme.colorScheme.error,
-                                        fontSize: 13,
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '⚡ Bora Treinar',
+                                        maxLines: 1,
+                                        style: theme.textTheme.displayMedium
+                                            ?.copyWith(
+                                              color: Colors.white,
+                                              fontWeight: FontWeight.w900,
+                                              fontSize: logoFontSize,
+                                            ),
                                       ),
-                                    ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        'Um passo de cada vez',
+                                        style: theme.textTheme.titleLarge
+                                            ?.copyWith(
+                                              color: Colors.white.withValues(
+                                                alpha: 0.92,
+                                              ),
+                                              fontWeight: FontWeight.w600,
+                                              fontSize: sloganFontSize,
+                                            ),
+                                      ),
+                                    ],
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ],
-                        ],
+                        ),
                       ),
-                    ),
+                      Container(
+                        width: double.infinity,
+                        constraints: BoxConstraints(minHeight: loginMinHeight),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(32),
+                          ),
+                        ),
+                        child: SafeArea(
+                          top: false,
+                          child: Padding(
+                            padding: EdgeInsets.fromLTRB(
+                              32,
+                              compact ? 32 : 40,
+                              32,
+                              compact ? 28 : 32,
+                            ),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Entre e comece sua jornada',
+                                  style: theme.textTheme.headlineSmall
+                                      ?.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF0D1B2A),
+                                      ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                const SizedBox(height: 12),
+                                Text(
+                                  'Ganhe XP, suba de liga, conquiste badges e compete com corredores do mundo todo!',
+                                  style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: Colors.black54,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                SizedBox(height: compact ? 24 : 32),
+                                FilledButton.icon(
+                                  onPressed: _loading
+                                      ? null
+                                      : _signInWithGoogle,
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF0D1B2A),
+                                    foregroundColor: Colors.white,
+                                    minimumSize: const Size.fromHeight(52),
+                                  ),
+                                  icon: _loading
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.white,
+                                                ),
+                                          ),
+                                        )
+                                      : const Icon(Icons.login),
+                                  label: const Text('Entrar com Google'),
+                                ),
+                                if (_errorMessage != null) ...[
+                                  const SizedBox(height: 16),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.shade50,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.red.shade200,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline,
+                                          color: theme.colorScheme.error,
+                                          size: 20,
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            _errorMessage!,
+                                            style: TextStyle(
+                                              color: theme.colorScheme.error,
+                                              fontSize: 13,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+            ],
+          );
+        },
       ),
     );
   }

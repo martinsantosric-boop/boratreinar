@@ -5,10 +5,16 @@ class BoltVideoWidget extends StatefulWidget {
   const BoltVideoWidget({
     super.key,
     this.size = 200,
+    this.width,
+    this.height,
+    this.borderRadius,
     this.assetPath = 'assets/bolt/expressions/boratreinar.mp4',
   });
 
   final double size;
+  final double? width;
+  final double? height;
+  final double? borderRadius;
   final String assetPath;
 
   @override
@@ -71,10 +77,12 @@ class _BoltVideoWidgetState extends State<BoltVideoWidget> {
     }
 
     return SizedBox(
-      width: widget.size,
-      height: widget.size,
+      width: widget.width ?? widget.size,
+      height: widget.height ?? widget.size,
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(widget.size * 0.1),
+        borderRadius: BorderRadius.circular(
+          widget.borderRadius ?? widget.size * 0.1,
+        ),
         child: FittedBox(
           fit: BoxFit.cover,
           child: SizedBox(

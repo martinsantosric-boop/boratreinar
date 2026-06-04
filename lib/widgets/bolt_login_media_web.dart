@@ -7,27 +7,37 @@ class BoltLoginMedia extends StatelessWidget {
   const BoltLoginMedia({
     super.key,
     this.size = 250,
+    this.width,
+    this.height,
+    this.borderRadius = 24,
     this.assetPath = 'assets/bolt/boratreinargift.mp4',
   });
 
   static final _registeredViewTypes = <String>{};
 
   final double size;
+  final double? width;
+  final double? height;
+  final double borderRadius;
   final String assetPath;
 
   @override
   Widget build(BuildContext context) {
-    final viewType = 'bolt-login-video-${assetPath.hashCode}';
-    _registerViewFactory(viewType, assetPath);
+    final viewType = 'bolt-login-video-${assetPath.hashCode}-$borderRadius';
+    _registerViewFactory(viewType, assetPath, borderRadius);
 
     return SizedBox(
-      width: size,
-      height: size,
+      width: width ?? size,
+      height: height ?? size,
       child: HtmlElementView(viewType: viewType),
     );
   }
 
-  static void _registerViewFactory(String viewType, String assetPath) {
+  static void _registerViewFactory(
+    String viewType,
+    String assetPath,
+    double borderRadius,
+  ) {
     if (!_registeredViewTypes.add(viewType)) return;
 
     ui_web.platformViewRegistry.registerViewFactory(viewType, (viewId) {
@@ -45,7 +55,7 @@ class BoltLoginMedia extends StatelessWidget {
         ..width = '100%'
         ..height = '100%'
         ..objectFit = 'cover'
-        ..borderRadius = '24px';
+        ..borderRadius = '${borderRadius}px';
 
       return video;
     });
