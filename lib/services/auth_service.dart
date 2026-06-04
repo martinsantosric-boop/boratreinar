@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../config/supabase_config.dart';
 import '../models/user_profile.dart';
 import 'auth_redirect.dart';
 
@@ -15,7 +16,7 @@ class AuthService {
     if (kIsWeb) {
       final response = await _client.auth.getOAuthSignInUrl(
         provider: OAuthProvider.google,
-        redirectTo: Uri.base.origin,
+        redirectTo: SupabaseConfig.authRedirectUrl,
       );
       redirectToUrl(response.url);
       return;
