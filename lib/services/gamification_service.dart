@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/achievement.dart';
 import '../models/daily_mission.dart';
@@ -94,8 +96,10 @@ class GamificationService {
     newState = newState.copyWith(achievements: achievementResults.achievements);
 
     // Adiciona XP das conquistas
-    final achievementXp = achievementResults.newlyUnlocked
-        .fold<int>(0, (sum, a) => sum + a.xpReward);
+    final achievementXp = achievementResults.newlyUnlocked.fold<int>(
+      0,
+      (sum, a) => sum + a.xpReward,
+    );
     newState = newState.copyWith(totalXp: newState.totalXp + achievementXp);
 
     // Atualiza missões diárias
@@ -103,8 +107,10 @@ class GamificationService {
     newState = newState.copyWith(dailyMissions: missionResults.missions);
 
     // Adiciona XP das missões
-    final missionXp =
-        missionResults.completed.fold<int>(0, (sum, m) => sum + m.xpReward);
+    final missionXp = missionResults.completed.fold<int>(
+      0,
+      (sum, m) => sum + m.xpReward,
+    );
     newState = newState.copyWith(totalXp: newState.totalXp + missionXp);
 
     // Verifica mudança de liga
@@ -113,6 +119,7 @@ class GamificationService {
     final leveledUp = newLeague != oldLeague;
 
     await saveState(newState);
+    await _syncWithSupabase(newState, allRuns);
 
     return GamificationResult(
       totalXpGained: runXp + achievementXp + missionXp,
@@ -126,6 +133,35 @@ class GamificationService {
     );
   }
 
+  Future<void> _syncWithSupabase(
+    GamificationState state,
+    List<RunSession> allRuns,
+  ) async {
+    final client = Supabase.instance.client;
+    final userId = client.auth.currentUser?.id;
+    if (userId == null) return;
+
+    try {
+      final totalKm = allRuns.fold<double>(
+        0,
+        (sum, run) => sum + run.distanceKm,
+      );
+
+      await client.from('user_gamification').upsert({
+        'user_id': userId,
+        'total_xp': state.totalXp,
+        'total_km': double.parse(totalKm.toStringAsFixed(2)),
+        'current_streak': state.currentStreak,
+        'longest_streak': state.longestStreak,
+        'last_run_date': state.lastRunDate?.toIso8601String(),
+        'achievements': state.achievements.map((a) => a.toJson()).toList(),
+        'updated_at': DateTime.now().toIso8601String(),
+      }, onConflict: 'user_id');
+    } catch (error) {
+      debugPrint('Falha ao sincronizar gamificacao: $error');
+    }
+  }
+
   _StreakResult _updateStreak(GamificationState state, RunSession run) {
     final lastRun = state.lastRunDate;
     if (lastRun == null) {
@@ -133,8 +169,11 @@ class GamificationService {
     }
 
     final lastRunDay = DateTime(lastRun.year, lastRun.month, lastRun.day);
-    final currentRunDay =
-        DateTime(run.startedAt.year, run.startedAt.month, run.startedAt.day);
+    final currentRunDay = DateTime(
+      run.startedAt.year,
+      run.startedAt.month,
+      run.startedAt.day,
+    );
     final daysDiff = currentRunDay.difference(lastRunDay).inDays;
 
     if (daysDiff == 0) {
@@ -227,7 +266,9 @@ class GamificationService {
       case AchievementType.totalRuns100:
         return allRuns.length >= 100;
       case AchievementType.speedRunner:
-        return allRuns.any((r) => r.paceSecondsPerKm > 0 && r.paceSecondsPerKm < 300);
+        return allRuns.any(
+          (r) => r.paceSecondsPerKm > 0 && r.paceSecondsPerKm < 300,
+        );
       case AchievementType.marathon:
         return allRuns.any((r) => r.distanceKm >= 42);
       case AchievementType.centurion:
@@ -239,16 +280,12 @@ class GamificationService {
     }
   }
 
-  _MissionResult _updateDailyMissions(
-    GamificationState state,
-    RunSession run,
-  ) {
+  _MissionResult _updateDailyMissions(GamificationState state, RunSession run) {
     final today = DateTime.now();
     var missions = List<DailyMission>.from(state.dailyMissions);
 
     // Verifica se precisa gerar novas missões (novo dia)
-    if (missions.isEmpty ||
-        !_isSameDay(missions.first.date, today)) {
+    if (missions.isEmpty || !_isSameDay(missions.first.date, today)) {
       missions = DailyMission.generateForDate(today);
     }
 
@@ -344,10 +381,7 @@ class _AchievementResult {
 }
 
 class _MissionResult {
-  const _MissionResult({
-    required this.missions,
-    required this.completed,
-  });
+  const _MissionResult({required this.missions, required this.completed});
 
   final List<DailyMission> missions;
   final List<DailyMission> completed;

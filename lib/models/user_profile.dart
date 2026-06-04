@@ -1,9 +1,5 @@
 class UserProfile {
-  const UserProfile({
-    this.bodyWeightKg = 70,
-    this.heightCm = 170,
-    this.age = 30,
-  });
+  const UserProfile({this.bodyWeightKg = 0, this.heightCm = 0, this.age = 0});
 
   final double bodyWeightKg;
   final double heightCm;
@@ -32,9 +28,9 @@ class UserProfile {
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      bodyWeightKg: ((json['bodyWeightKg'] as num?) ?? 70).toDouble(),
-      heightCm: ((json['heightCm'] as num?) ?? 170).toDouble(),
-      age: ((json['age'] as num?) ?? 30).toInt(),
+      bodyWeightKg: ((json['bodyWeightKg'] as num?) ?? 0).toDouble(),
+      heightCm: ((json['heightCm'] as num?) ?? 0).toDouble(),
+      age: ((json['age'] as num?) ?? 0).toInt(),
     );
   }
 }

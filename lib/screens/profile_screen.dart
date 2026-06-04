@@ -27,21 +27,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void initState() {
     super.initState();
     _weightController = TextEditingController(
-      text: widget.profile.bodyWeightKg.toStringAsFixed(1),
+      text: _formatPositiveDouble(widget.profile.bodyWeightKg, decimals: 1),
     );
     _heightController = TextEditingController(
-      text: widget.profile.heightCm.toStringAsFixed(0),
+      text: _formatPositiveDouble(widget.profile.heightCm, decimals: 0),
     );
-    _ageController = TextEditingController(text: '${widget.profile.age}');
+    _ageController = TextEditingController(
+      text: widget.profile.age > 0 ? '${widget.profile.age}' : '',
+    );
   }
 
   @override
   void didUpdateWidget(covariant ProfileScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.profile == widget.profile) return;
-    _weightController.text = widget.profile.bodyWeightKg.toStringAsFixed(1);
-    _heightController.text = widget.profile.heightCm.toStringAsFixed(0);
-    _ageController.text = '${widget.profile.age}';
+    _weightController.text = _formatPositiveDouble(
+      widget.profile.bodyWeightKg,
+      decimals: 1,
+    );
+    _heightController.text = _formatPositiveDouble(
+      widget.profile.heightCm,
+      decimals: 0,
+    );
+    _ageController.text = widget.profile.age > 0 ? '${widget.profile.age}' : '';
+  }
+
+  String _formatPositiveDouble(double value, {required int decimals}) {
+    if (value <= 0) return '';
+    return value.toStringAsFixed(decimals);
   }
 
   @override
