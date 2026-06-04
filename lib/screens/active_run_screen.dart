@@ -318,8 +318,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
           ),
           if (_mostrarMascote)
             Positioned.fill(
-              child: Container(
-                color: Colors.white,
+              child: IgnorePointer(
                 child: Center(
                   child: SizedBox(
                     width: 300,
