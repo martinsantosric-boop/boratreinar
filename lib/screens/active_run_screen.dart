@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
-import 'package:video_player/video_player.dart';
 
 import '../models/geo_sample.dart';
 import '../models/run_session.dart';
@@ -30,7 +29,6 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   final _stepCounter = StepCounterService();
   final _apitoPlayer = AudioPlayer();
   final _route = <GeoSample>[];
-  late final VideoPlayerController _mascoteController;
   StreamSubscription<LocationUpdate>? _locationSubscription;
   StreamSubscription<int>? _stepSubscription;
   Timer? _timer;
@@ -46,13 +44,6 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   @override
   void initState() {
     super.initState();
-    _mascoteController = VideoPlayerController.asset(
-      'assets/bolt/abertura_mascote.mp4',
-    );
-    _mascoteController.initialize().then((_) {
-      if (!mounted) return;
-      setState(() {});
-    });
   }
 
   @override
@@ -62,7 +53,6 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
     _stepSubscription?.cancel();
     _tracker.stop();
     _stepCounter.stop();
-    _mascoteController.dispose();
     _apitoPlayer.dispose();
     super.dispose();
   }
@@ -74,28 +64,8 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   }
 
   Future<void> _executarAberturaMascote() async {
-    // Garantir que o vídeo está inicializado
-    if (!_mascoteController.value.isInitialized) {
-      print('⚠️ Vídeo não inicializado. Tentando inicializar...');
-      try {
-        await _mascoteController.initialize();
-        if (!mounted) return;
-      } catch (e) {
-        print('❌ Erro ao inicializar vídeo: $e');
-        return; // Se falhar, continua sem o vídeo
-      }
-    }
-
-    print('✅ Iniciando animação do mascote');
+    print('✅ Iniciando animação do mascote (GIF)');
     setState(() => _mostrarMascote = true);
-
-    try {
-      await _mascoteController.seekTo(Duration.zero);
-      await _mascoteController.play();
-      print('✅ Vídeo tocando');
-    } catch (e) {
-      print('❌ Erro ao tocar vídeo: $e');
-    }
 
     try {
       await _apitoPlayer.play(AssetSource('apito.mp3'));
@@ -108,7 +78,6 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
 
     if (!mounted) return;
 
-    await _mascoteController.pause();
     setState(() => _mostrarMascote = false);
     print('✅ Animação do mascote concluída');
   }
@@ -344,34 +313,15 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
               child: Container(
                 color: Colors.black.withValues(alpha: 0.85),
                 child: Center(
-                  child: _mascoteController.value.isInitialized
-                      ? SizedBox(
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: MediaQuery.of(context).size.width * 0.9,
-                          child: FittedBox(
-                            fit: BoxFit.contain,
-                            child: SizedBox(
-                              width: _mascoteController.value.size.width,
-                              height: _mascoteController.value.size.height,
-                              child: VideoPlayer(_mascoteController),
-                            ),
-                          ),
-                        )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const CircularProgressIndicator(
-                              color: Colors.white,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              'Carregando animação...',
-                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
+                  child: SizedBox(
+                    width: MediaQuery.of(context).size.width * 0.9,
+                    height: MediaQuery.of(context).size.width * 0.9,
+                    child: Image.asset(
+                      'assets/bolt/abertura_mascote.gif',
+                      fit: BoxFit.contain,
+                      filterQuality: FilterQuality.high,
+                    ),
+                  ),
                 ),
               ),
             ),
