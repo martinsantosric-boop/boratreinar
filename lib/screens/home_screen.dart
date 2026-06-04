@@ -71,16 +71,16 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (run == null) return;
-    
+
     await _storage.saveRun(run);
-    
+
     // Processa gamificação
     final result = await _gamification.processRun(run, [run, ..._runs]);
-    
+
     await _loadData();
-    
+
     if (!mounted) return;
-    
+
     // Mostra dialog de recompensas se houver
     if (result.hasRewards) {
       await RewardsDialog.show(
@@ -254,339 +254,337 @@ class _DashboardTab extends StatelessWidget {
     final weekDistance = runs
         .where((run) => run.startedAt.isAfter(weekStart))
         .fold<double>(0, (sum, run) => sum + run.distanceKm);
-    
+
     final league = gamificationState.currentLeague;
     final dailyMissions = gamificationState.dailyMissions;
     final completedMissions = dailyMissions.where((m) => m.isCompleted).length;
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-      children: [
-        // Card principal com Bolt
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Row(
-              children: [
-                BoltWidget(
-                  expression: gamificationState.currentStreak >= 7
-                      ? BoltExpression.fire
-                      : BoltExpression.ready,
-                  league: league,
-                  size: 100,
-                  showLeagueBadge: true,
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        _getBoltGreeting(),
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${league.emoji} Liga ${league.displayName}',
-                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      FilledButton.icon(
-                        onPressed: onStartRun,
-                        icon: const Icon(Icons.play_arrow, size: 20),
-                        label: const Text('Bora treinar!'),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 20,
-                            vertical: 8,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 16),
-
-        // XP e progresso
-        Card(
-          color: Colors.purple.shade50,
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 760),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          children: [
+            // Card principal com Bolt
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Row(
                   children: [
-                    const Text('⭐', style: TextStyle(fontSize: 32)),
-                    const SizedBox(width: 12),
+                    BoltWidget(
+                      expression: gamificationState.currentStreak >= 7
+                          ? BoltExpression.fire
+                          : BoltExpression.ready,
+                      league: league,
+                      size: 120,
+                      showLeagueBadge: true,
+                    ),
+                    const SizedBox(width: 16),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            '${gamificationState.totalXp} XP',
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                              fontWeight: FontWeight.w900,
+                            _getBoltGreeting(),
+                            style: Theme.of(context).textTheme.titleLarge
+                                ?.copyWith(fontWeight: FontWeight.w900),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${league.emoji} Liga ${league.displayName}',
+                            style: Theme.of(context).textTheme.bodyLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          const SizedBox(height: 8),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 220),
+                              child: FilledButton.icon(
+                                onPressed: onStartRun,
+                                icon: const Icon(Icons.play_arrow, size: 20),
+                                label: const Text('Bora treinar!'),
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size.fromHeight(44),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 18,
+                                    vertical: 12,
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                          if (gamificationState.xpToNextLeague != null)
-                            Text(
-                              'Faltam ${gamificationState.xpToNextLeague} XP para ${league.emoji == '👑' ? 'manter' : 'subir de liga'}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
-                LinearProgressIndicator(
-                  value: gamificationState.progressInCurrentLeague,
-                  backgroundColor: Colors.purple.shade100,
-                  valueColor: AlwaysStoppedAnimation<Color>(
-                    Colors.purple.shade400,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // XP e progresso
+            Card(
+              color: Colors.purple.shade50,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Text('⭐', style: TextStyle(fontSize: 32)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${gamificationState.totalXp} XP',
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineMedium
+                                    ?.copyWith(fontWeight: FontWeight.w900),
+                              ),
+                              if (gamificationState.xpToNextLeague != null)
+                                Text(
+                                  'Faltam ${gamificationState.xpToNextLeague} XP para ${league.emoji == '👑' ? 'manter' : 'subir de liga'}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    LinearProgressIndicator(
+                      value: gamificationState.progressInCurrentLeague,
+                      backgroundColor: Colors.purple.shade100,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.purple.shade400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Streak e Conquistas
+            Row(
+              children: [
+                Expanded(
+                  child: Card(
+                    color: Colors.orange.shade50,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          const Text('🔥', style: TextStyle(fontSize: 32)),
+                          const SizedBox(height: 8),
+                          Text(
+                            '${gamificationState.currentStreak}',
+                            style: Theme.of(context).textTheme.headlineMedium
+                                ?.copyWith(fontWeight: FontWeight.w900),
+                          ),
+                          Text(
+                            'dias seguidos',
+                            style: Theme.of(context).textTheme.bodySmall,
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: InkWell(
+                    onTap: onOpenAchievements,
+                    child: Card(
+                      color: Colors.green.shade50,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          children: [
+                            const Text('🏆', style: TextStyle(fontSize: 32)),
+                            const SizedBox(height: 8),
+                            Text(
+                              '${gamificationState.unlockedAchievementsCount}/${gamificationState.achievements.length}',
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(fontWeight: FontWeight.w900),
+                            ),
+                            Text(
+                              'conquistas',
+                              style: Theme.of(context).textTheme.bodySmall,
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
-          ),
-        ),
-        const SizedBox(height: 16),
+            const SizedBox(height: 16),
 
-        // Streak e Conquistas
-        Row(
-          children: [
-            Expanded(
-              child: Card(
-                color: Colors.orange.shade50,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      const Text('🔥', style: TextStyle(fontSize: 32)),
-                      const SizedBox(height: 8),
-                      Text(
-                        '${gamificationState.currentStreak}',
-                        style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.w900,
+            // Missões diárias
+            if (dailyMissions.isNotEmpty) ...[
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Missões de hoje', style: _sectionTitleStyle(context)),
+                  Text(
+                    '$completedMissions/${dailyMissions.length}',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.green,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              ...dailyMissions.map(
+                (mission) => Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Card(
+                    color: mission.isCompleted
+                        ? Colors.green.shade50
+                        : Colors.white,
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: mission.isCompleted
+                            ? Colors.green.shade100
+                            : Colors.grey.shade200,
+                        child: mission.isCompleted
+                            ? const Icon(Icons.check, color: Colors.green)
+                            : Text(
+                                mission.icon,
+                                style: const TextStyle(fontSize: 20),
+                              ),
+                      ),
+                      title: Text(
+                        mission.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          decoration: mission.isCompleted
+                              ? TextDecoration.lineThrough
+                              : null,
                         ),
                       ),
-                      Text(
-                        'dias seguidos',
-                        style: Theme.of(context).textTheme.bodySmall,
-                        textAlign: TextAlign.center,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: InkWell(
-                onTap: onOpenAchievements,
-                child: Card(
-                  color: Colors.green.shade50,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      children: [
-                        const Text('🏆', style: TextStyle(fontSize: 32)),
-                        const SizedBox(height: 8),
-                        Text(
-                          '${gamificationState.unlockedAchievementsCount}/${gamificationState.achievements.length}',
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.w900,
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.amber.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          '+${mission.xpReward} XP',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.amber.shade900,
                           ),
                         ),
-                        Text(
-                          'conquistas',
-                          style: Theme.of(context).textTheme.bodySmall,
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
+              const SizedBox(height: 16),
+            ],
 
-        // Missões diárias
-        if (dailyMissions.isNotEmpty) ...[
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Missões de hoje',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
+            // Resumo estatístico
+            Text('Resumo', style: _sectionTitleStyle(context)),
+            const SizedBox(height: 12),
+            GridView.count(
+              crossAxisCount: 2,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 1.28,
+              children: [
+                MetricTile(
+                  label: 'Total corrido',
+                  value: formatDistance(totalDistance),
+                  icon: Icons.route,
                 ),
-              ),
-              Text(
-                '$completedMissions/${dailyMissions.length}',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green,
+                MetricTile(
+                  label: 'Treinos',
+                  value: '${runs.length}',
+                  icon: Icons.calendar_month,
+                ),
+                MetricTile(
+                  label: 'Na semana',
+                  value: '${weekDistance.toStringAsFixed(1)} km',
+                  icon: Icons.trending_up,
+                ),
+                MetricTile(
+                  label: 'XP Total',
+                  value: '${gamificationState.totalXp}',
+                  icon: Icons.star,
+                ),
+              ],
+            ),
+
+            if (!hasUserProfile) ...[
+              const SizedBox(height: 16),
+              Card(
+                child: ListTile(
+                  leading: Icon(
+                    Icons.person_add_alt_1_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  title: const Text('Complete seu perfil'),
+                  subtitle: const Text(
+                    'Peso, altura e idade deixam calorias e passos mais precisos.',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: onOpenProfile,
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          ...dailyMissions.map(
-            (mission) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Card(
-                color: mission.isCompleted
-                    ? Colors.green.shade50
-                    : Colors.white,
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: mission.isCompleted
-                        ? Colors.green.shade100
-                        : Colors.grey.shade200,
-                    child: mission.isCompleted
-                        ? const Icon(Icons.check, color: Colors.green)
-                        : Text(
-                            mission.icon,
-                            style: const TextStyle(fontSize: 20),
-                          ),
-                  ),
-                  title: Text(
-                    mission.title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      decoration: mission.isCompleted
-                          ? TextDecoration.lineThrough
-                          : null,
-                    ),
-                  ),
-                  trailing: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.amber.shade100,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      '+${mission.xpReward} XP',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.amber.shade900,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
 
-        // Resumo estatístico
-        Text(
-          'Resumo',
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 12),
-        GridView.count(
-          crossAxisCount: 2,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.28,
-          children: [
-            MetricTile(
-              label: 'Total corrido',
-              value: formatDistance(totalDistance),
-              icon: Icons.route,
-            ),
-            MetricTile(
-              label: 'Treinos',
-              value: '${runs.length}',
-              icon: Icons.calendar_month,
-            ),
-            MetricTile(
-              label: 'Na semana',
-              value: '${weekDistance.toStringAsFixed(1)} km',
-              icon: Icons.trending_up,
-            ),
-            MetricTile(
-              label: 'XP Total',
-              value: '${gamificationState.totalXp}',
-              icon: Icons.star,
-            ),
+            const SizedBox(height: 16),
+            Text('Últimas corridas', style: _sectionTitleStyle(context)),
+            const SizedBox(height: 12),
+            if (runs.isEmpty)
+              const _EmptyState()
+            else
+              ...runs
+                  .take(3)
+                  .map(
+                    (run) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: RunCard(run: run),
+                    ),
+                  ),
           ],
         ),
+      ),
+    );
+  }
 
-        if (!hasUserProfile) ...[
-          const SizedBox(height: 16),
-          Card(
-            child: ListTile(
-              leading: Icon(
-                Icons.person_add_alt_1_outlined,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              title: const Text('Complete seu perfil'),
-              subtitle: const Text(
-                'Peso, altura e idade deixam calorias e passos mais precisos.',
-              ),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: onOpenProfile,
-            ),
-          ),
-        ],
-
-        const SizedBox(height: 16),
-        Text(
-          'Últimas corridas',
-          style: Theme.of(
-            context,
-          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
-        ),
-        const SizedBox(height: 12),
-        if (runs.isEmpty)
-          const _EmptyState()
-        else
-          ...runs
-              .take(3)
-              .map(
-                (run) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: RunCard(run: run),
-                ),
-              ),
-      ],
+  TextStyle? _sectionTitleStyle(BuildContext context) {
+    return Theme.of(context).textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w900,
+      letterSpacing: 0.4,
     );
   }
 
   String _getBoltGreeting() {
     final hour = DateTime.now().hour;
     final streak = gamificationState.currentStreak;
-    
+
     if (streak >= 7) {
       return 'Você está em chamas! 🔥';
     }
-    
+
     if (hour < 12) {
       return 'Bom dia! Bora treinar?';
     } else if (hour < 18) {

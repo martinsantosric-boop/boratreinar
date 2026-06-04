@@ -2,15 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/league.dart';
 
-enum BoltExpression {
-  happy,
-  cool,
-  excited,
-  fire,
-  trophy,
-  sleeping,
-  ready,
-}
+enum BoltExpression { happy, cool, excited, fire, trophy, sleeping, ready }
 
 class BoltWidget extends StatelessWidget {
   const BoltWidget({
@@ -63,10 +55,7 @@ class BoltWidget extends StatelessWidget {
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
-                border: Border.all(
-                  color: _getLeagueBorderColor(),
-                  width: 2,
-                ),
+                border: Border.all(color: _getLeagueBorderColor(), width: 2),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.2),
@@ -85,6 +74,27 @@ class BoltWidget extends StatelessWidget {
   }
 
   Widget _buildBoltImage() {
+    final image = _buildAssetImage();
+
+    if (league == null) return image;
+
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: _getLeagueBorderColor().withValues(alpha: 0.35),
+            blurRadius: 18,
+            spreadRadius: 1,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: image,
+    );
+  }
+
+  Widget _buildAssetImage() {
     // Tenta carregar imagem por liga primeiro, se não encontrar usa por expressão
     if (league != null && _leagueImageExists()) {
       return Image.asset(
@@ -138,10 +148,7 @@ class BoltWidget extends StatelessWidget {
           Positioned(
             top: size * 0.05,
             left: size * 0.35,
-            child: Text(
-              '⚡',
-              style: TextStyle(fontSize: size * 0.3),
-            ),
+            child: Text('⚡', style: TextStyle(fontSize: size * 0.3)),
           ),
           // Rosto
           Positioned(
@@ -262,11 +269,7 @@ class BoltMessage extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Row(
           children: [
-            BoltWidget(
-              expression: expression,
-              league: league,
-              size: 60,
-            ),
+            BoltWidget(expression: expression, league: league, size: 60),
             const SizedBox(width: 16),
             Expanded(
               child: Column(
