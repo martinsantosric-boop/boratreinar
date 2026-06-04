@@ -58,8 +58,9 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   }
 
   Future<void> _startWithMascote() async {
-    await _executarAberturaMascote();
-    if (!mounted) return;
+    // DESATIVADO TEMPORARIAMENTE - Remover fundo do GIF primeiro
+    // await _executarAberturaMascote();
+    // if (!mounted) return;
     await _start();
   }
 
