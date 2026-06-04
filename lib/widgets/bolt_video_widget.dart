@@ -5,16 +5,18 @@ class BoltVideoWidget extends StatefulWidget {
   const BoltVideoWidget({
     super.key,
     this.size = 200,
+    this.assetPath = 'assets/bolt/expressions/boratreinar.mp4',
   });
 
   final double size;
+  final String assetPath;
 
   @override
   State<BoltVideoWidget> createState() => _BoltVideoWidgetState();
 }
 
 class _BoltVideoWidgetState extends State<BoltVideoWidget> {
-  late VideoPlayerController _controller;
+  VideoPlayerController? _controller;
   bool _initialized = false;
 
   @override
@@ -25,18 +27,20 @@ class _BoltVideoWidgetState extends State<BoltVideoWidget> {
 
   Future<void> _initializeVideo() async {
     try {
-      _controller = VideoPlayerController.asset(
-        'assets/bolt/expressions/boratreinar.mp4',
-      );
+      final controller = VideoPlayerController.asset(widget.assetPath);
 
-      await _controller.initialize();
-      await _controller.setLooping(true);
-      await _controller.play();
+      await controller.initialize();
+      await controller.setLooping(true);
+      await controller.setVolume(0);
+      await controller.play();
 
       if (mounted) {
         setState(() {
+          _controller = controller;
           _initialized = true;
         });
+      } else {
+        await controller.dispose();
       }
     } catch (e) {
       debugPrint('Erro ao carregar vídeo: $e');
@@ -45,12 +49,14 @@ class _BoltVideoWidgetState extends State<BoltVideoWidget> {
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = _controller;
+
     if (!_initialized) {
       // Placeholder enquanto carrega
       return SizedBox(
@@ -72,12 +78,17 @@ class _BoltVideoWidgetState extends State<BoltVideoWidget> {
         child: FittedBox(
           fit: BoxFit.cover,
           child: SizedBox(
-            width: _controller.value.size.width,
-            height: _controller.value.size.height,
-            child: VideoPlayer(_controller),
+            width: widget.size,
+            height: widget.size / _aspectRatio,
+            child: VideoPlayer(controller!),
           ),
         ),
       ),
     );
+  }
+
+  double get _aspectRatio {
+    final aspectRatio = _controller?.value.aspectRatio ?? 0;
+    return aspectRatio > 0 ? aspectRatio : 16 / 9;
   }
 }

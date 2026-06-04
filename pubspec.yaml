@@ -67,6 +67,7 @@ flutter:
 
   # Assets do Bolt
   assets:
+    - assets/bolt/boratreinargift.mp4
     - assets/bolt/expressions/
     - assets/bolt/leagues/
 

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
-import '../widgets/bolt_widget.dart';
+import '../widgets/bolt_login_media.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -55,7 +55,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
           ),
-          
+
           // Conteúdo
           SafeArea(
             child: Column(
@@ -68,8 +68,8 @@ class _AuthScreenState extends State<AuthScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         // Bolt GIGANTE
-                        const BoltWidget(
-                          expression: BoltExpression.ready,
+                        const BoltLoginMedia(
+                          assetPath: 'assets/bolt/boratreinargift.mp4',
                           size: 250, // Tamanho fixo grande
                         ),
                         const SizedBox(height: 24),
@@ -96,7 +96,7 @@ class _AuthScreenState extends State<AuthScreen> {
                     ),
                   ),
                 ),
-                
+
                 // Card inferior branco com login
                 Expanded(
                   flex: 4,
@@ -153,7 +153,7 @@ class _AuthScreenState extends State<AuthScreen> {
                                 : const Icon(Icons.login),
                             label: const Text('Entrar com Google'),
                           ),
-                          
+
                           // Erro
                           if (_errorMessage != null) ...[
                             const SizedBox(height: 16),
