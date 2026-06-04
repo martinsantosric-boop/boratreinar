@@ -1,0 +1,152 @@
+════════════════════════════════════════════════════════════════
+    📋 LISTA DE IMAGENS PARA COPIAR PARA OUTRO PC
+════════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANTE: Copie estas pastas COMPLETAS para o outro computador!
+
+
+📁 PASTA 1: assets\bolt\expressions\
+════════════════════════════════════════════════════════════════
+
+[ ] ready.png          ⭐ PRINCIPAL - Usado na tela de login
+[ ] happy.png
+[ ] excited.png
+[ ] fire.png
+[ ] trophy.png
+[ ] sleeping.png
+[ ] cool.png
+
+Total: 7 arquivos PNG
+
+
+📁 PASTA 2: assets\bolt\leagues\
+════════════════════════════════════════════════════════════════
+
+[ ] bronze.png
+[ ] silver.png
+[ ] gold.png
+[ ] diamond.png
+[ ] legendary.png
+
+Total: 5 arquivos PNG
+
+
+════════════════════════════════════════════════════════════════
+    📊 RESUMO
+════════════════════════════════════════════════════════════════
+
+Total de imagens: 12 arquivos PNG
+Tamanho aproximado: ~2-5 MB
+
+Todas as imagens têm fundo removido (transparente ou azul #0D1B2A)
+
+
+════════════════════════════════════════════════════════════════
+    💾 COMO COPIAR
+════════════════════════════════════════════════════════════════
+
+OPÇÃO 1 - Windows Explorer (Mais Fácil):
+────────────────────────────────────────────────────────────────
+
+1. Abra: D:\Projetos\boratreinar\assets\bolt\
+
+2. Copie estas 2 pastas:
+   ☑️ expressions
+   ☑️ leagues
+
+3. Cole em pendrive/OneDrive/Google Drive
+
+4. No outro PC, cole em: 
+   D:\Projetos\boratreinar\assets\bolt\
+
+
+OPÇÃO 2 - PowerShell (Rápido):
+────────────────────────────────────────────────────────────────
+
+# Copiar para pendrive E:\
+Copy-Item -Recurse assets\bolt\expressions E:\backup-bolt\
+Copy-Item -Recurse assets\bolt\leagues E:\backup-bolt\
+
+# No outro PC, restaurar:
+Copy-Item -Recurse E:\backup-bolt\expressions assets\bolt\
+Copy-Item -Recurse E:\backup-bolt\leagues assets\bolt\
+
+
+OPÇÃO 3 - Copiar Projeto Inteiro (Recomendado):
+────────────────────────────────────────────────────────────────
+
+Copie toda a pasta D:\Projetos\boratreinar\ para o outro PC
+
+Isso inclui:
+✅ Código
+✅ Imagens
+✅ Configurações
+✅ Documentação
+
+
+════════════════════════════════════════════════════════════════
+    ✅ VERIFICAÇÃO NO OUTRO PC
+════════════════════════════════════════════════════════════════
+
+Após copiar, verifique se estes arquivos existem:
+
+Pasta expressions:
+─────────────────
+D:\Projetos\boratreinar\assets\bolt\expressions\ready.png
+D:\Projetos\boratreinar\assets\bolt\expressions\happy.png
+D:\Projetos\boratreinar\assets\bolt\expressions\excited.png
+D:\Projetos\boratreinar\assets\bolt\expressions\fire.png
+D:\Projetos\boratreinar\assets\bolt\expressions\trophy.png
+D:\Projetos\boratreinar\assets\bolt\expressions\sleeping.png
+D:\Projetos\boratreinar\assets\bolt\expressions\cool.png
+
+Pasta leagues:
+─────────────────
+D:\Projetos\boratreinar\assets\bolt\leagues\bronze.png
+D:\Projetos\boratreinar\assets\bolt\leagues\silver.png
+D:\Projetos\boratreinar\assets\bolt\leagues\gold.png
+D:\Projetos\boratreinar\assets\bolt\leagues\diamond.png
+D:\Projetos\boratreinar\assets\bolt\leagues\legendary.png
+
+
+════════════════════════════════════════════════════════════════
+    🚨 SE ESQUECER AS IMAGENS
+════════════════════════════════════════════════════════════════
+
+Sintoma: App builda mas Bolt não aparece na tela
+
+Solução:
+1. Copie as pastas de imagens do PC atual
+2. Cole no novo PC em: assets\bolt\
+3. Execute: flutter build web --release
+4. Deploy: firebase deploy --only hosting
+
+
+════════════════════════════════════════════════════════════════
+    📦 ALTERNATIVA: GERAR NOVAS IMAGENS
+════════════════════════════════════════════════════════════════
+
+Se não conseguir copiar as imagens, gere novas com IA:
+
+1. Abra: prompt-ia-simples.txt
+2. Copie o prompt
+3. Use em: ChatGPT, Leonardo.AI, Midjourney
+4. Gere imagem 1200x1200px com fundo #0D1B2A
+5. Salve como: ready.png (mínimo necessário)
+6. Cole em: assets\bolt\expressions\
+
+
+════════════════════════════════════════════════════════════════
+    📌 LEMBRETE
+════════════════════════════════════════════════════════════════
+
+A imagem MAIS IMPORTANTE é:
+⭐ assets\bolt\expressions\ready.png
+
+Esta é usada na tela de login. As outras são usadas em outras
+partes do app (gamificação, ligas, etc).
+
+Se tiver que escolher apenas UMA imagem para copiar, copie esta!
+
+
+════════════════════════════════════════════════════════════════

@@ -1,0 +1,13 @@
+Crie um personagem mascote chamado Bolt para app de corrida.
+
+Personagem: Cachorro branco cartoon 3D muito amigável e motivador, com símbolo de raio laranja no peito, sorrindo e fazendo gesto de positivo com a pata direita levantada.
+
+Especificações técnicas:
+- Tamanho: 1200x1200 pixels (quadrado)
+- Fundo: azul escuro sólido cor #0D1B2A (muito importante!)
+- Estilo: cartoon 3D limpo, moderno, tipo mascote de app
+- Iluminação: suave e amigável
+- Qualidade: alta definição
+- Formato: PNG
+
+O Bolt deve ocupar 80% da imagem, centralizado, com expressão super amigável e motivadora. Fundo azul escuro sólido sem gradientes.

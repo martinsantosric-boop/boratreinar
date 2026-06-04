@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
+import '../widgets/bolt_widget.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -34,72 +35,165 @@ class _AuthScreenState extends State<AuthScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
 
     return Scaffold(
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 32, 16, 24),
-          children: [
-            Card(
-              color: theme.colorScheme.primary,
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.directions_run,
-                      color: theme.colorScheme.onPrimary,
-                      size: 42,
-                    ),
-                    const SizedBox(height: 18),
-                    Text(
-                      'Bora Treinar',
-                      style: theme.textTheme.headlineMedium?.copyWith(
-                        color: theme.colorScheme.onPrimary,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Entre com sua conta Google para salvar progresso, perfil e preparar o ranking.',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onPrimary.withValues(
-                          alpha: 0.86,
+      body: Stack(
+        children: [
+          // Fundo azul escuro ocupando topo
+          Container(
+            height: size.height * 0.6,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  Color(0xFF0D1B2A), // Azul escuro
+                  Color(0xFF1E3A5F), // Azul médio
+                ],
+              ),
+            ),
+          ),
+          
+          // Conteúdo
+          SafeArea(
+            child: Column(
+              children: [
+                // Topo com Bolt GIGANTE
+                Expanded(
+                  flex: 6,
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        // Bolt GIGANTE
+                        const BoltWidget(
+                          expression: BoltExpression.ready,
+                          size: 250, // Tamanho fixo grande
                         ),
+                        const SizedBox(height: 24),
+                        // Logo/Nome
+                        Text(
+                          '⚡ Bora Treinar',
+                          style: theme.textTheme.displayMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w900,
+                            fontSize: 42,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        // Slogan
+                        Text(
+                          'Um passo de cada vez',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                
+                // Card inferior branco com login
+                Expanded(
+                  flex: 4,
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(32),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 20),
-            FilledButton.icon(
-              onPressed: _loading ? null : _signInWithGoogle,
-              icon: _loading
-                  ? const SizedBox(
-                      width: 18,
-                      height: 18,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.login),
-              label: const Text('Entrar com Google'),
-            ),
-            if (_errorMessage != null) ...[
-              const SizedBox(height: 16),
-              Card(
-                child: ListTile(
-                  leading: Icon(
-                    Icons.error_outline,
-                    color: theme.colorScheme.error,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(32, 40, 32, 32),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Título
+                          Text(
+                            'Entre e comece sua jornada',
+                            style: theme.textTheme.headlineSmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF0D1B2A),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 12),
+                          // Descrição
+                          Text(
+                            'Ganhe XP, suba de liga, conquiste badges e compete com corredores do mundo todo!',
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: Colors.black54,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 32),
+                          // Botão de Login
+                          FilledButton.icon(
+                            onPressed: _loading ? null : _signInWithGoogle,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFF0D1B2A),
+                              foregroundColor: Colors.white,
+                            ),
+                            icon: _loading
+                                ? const SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                : const Icon(Icons.login),
+                            label: const Text('Entrar com Google'),
+                          ),
+                          
+                          // Erro
+                          if (_errorMessage != null) ...[
+                            const SizedBox(height: 16),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.red.shade200),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.error_outline,
+                                    color: theme.colorScheme.error,
+                                    size: 20,
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Text(
+                                      _errorMessage!,
+                                      style: TextStyle(
+                                        color: theme.colorScheme.error,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
                   ),
-                  title: Text(_errorMessage!),
                 ),
-              ),
-            ],
-          ],
-        ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

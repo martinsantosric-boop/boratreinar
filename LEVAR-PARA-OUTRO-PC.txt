@@ -1,0 +1,253 @@
+════════════════════════════════════════════════════════════════
+    🚀 LEVAR PARA OUTRO COMPUTADOR - GUIA RÁPIDO
+════════════════════════════════════════════════════════════════
+
+
+🎯 O QUE FOI FEITO AQUI (RESUMO)
+════════════════════════════════════════════════════════════════
+
+✅ Corrigido manifest.json - cores #0D1B2A
+✅ Simplificado código - PNG em vez de vídeo
+✅ App funcionando - https://gotreiinar.web.app
+✅ 12 imagens do Bolt processadas (fundo removido)
+
+
+📦 O QUE COPIAR PARA O OUTRO PC
+════════════════════════════════════════════════════════════════
+
+OPÇÃO 1 - COPIAR PROJETO INTEIRO (Recomendado):
+────────────────────────────────────────────────
+
+Copie a pasta completa:
+D:\Projetos\boratreinar\
+
+Para pendrive/OneDrive/Google Drive
+
+Isso inclui:
+✅ Todo o código
+✅ Todas as imagens (12 PNGs)
+✅ Todas as configurações
+✅ Toda a documentação
+
+
+OPÇÃO 2 - COPIAR APENAS O ESSENCIAL (Mínimo):
+────────────────────────────────────────────────
+
+Se o projeto já estiver no Git:
+
+1. Clonar repositório no outro PC
+2. Copiar apenas as imagens:
+   ☑️ assets\bolt\expressions\ (7 PNGs)
+   ☑️ assets\bolt\leagues\ (5 PNGs)
+
+
+════════════════════════════════════════════════════════════════
+    ⚡ SCRIPT AUTOMÁTICO PARA COPIAR
+════════════════════════════════════════════════════════════════
+
+Execute este comando no PowerShell:
+
+    .\copiar-para-pendrive.ps1
+
+O script vai:
+✅ Verificar as imagens
+✅ Pedir letra do pendrive (E:, F:, G:, etc)
+✅ Copiar tudo automaticamente
+✅ Copiar documentação importante
+
+
+════════════════════════════════════════════════════════════════
+    📋 12 IMAGENS NECESSÁRIAS
+════════════════════════════════════════════════════════════════
+
+assets\bolt\expressions\ (7 PNGs):
+─────────────────────────────────
+1. ready.png      ⭐ PRINCIPAL (tela de login)
+2. happy.png
+3. excited.png
+4. fire.png
+5. trophy.png
+6. sleeping.png
+7. cool.png
+
+assets\bolt\leagues\ (5 PNGs):
+─────────────────────────────────
+8. bronze.png
+9. silver.png
+10. gold.png
+11. diamond.png
+12. legendary.png
+
+
+════════════════════════════════════════════════════════════════
+    🖥️ SETUP NO OUTRO COMPUTADOR
+════════════════════════════════════════════════════════════════
+
+PASSO 1 - Instalar Flutter:
+─────────────────────────────────
+1. Baixe: https://docs.flutter.dev/get-started/install/windows
+2. Extraia para: C:\flutter
+3. Adicione ao PATH: C:\flutter\bin
+4. Verifique: flutter --version
+
+
+PASSO 2 - Instalar Firebase CLI:
+─────────────────────────────────
+npm install -g firebase-tools
+
+Ou baixe: https://firebase.tools
+
+
+PASSO 3 - Copiar Projeto:
+─────────────────────────────────
+Cole a pasta boratreinar em: D:\Projetos\
+
+Ou clone do Git (se estiver no repositório)
+
+
+PASSO 4 - Copiar Imagens (se não copiou projeto inteiro):
+─────────────────────────────────
+Do pendrive, copie pastas:
+- expressions\
+- leagues\
+
+Para: D:\Projetos\boratreinar\assets\bolt\
+
+
+PASSO 5 - Build e Deploy:
+─────────────────────────────────
+cd D:\Projetos\boratreinar
+flutter pub get
+flutter build web --release
+firebase deploy --only hosting
+
+
+════════════════════════════════════════════════════════════════
+    ⏱️ TEMPO ESTIMADO
+════════════════════════════════════════════════════════════════
+
+Copiar arquivos:       2-5 minutos
+Instalar Flutter:      10-15 minutos
+Instalar Firebase:     2-3 minutos
+Build e Deploy:        5 minutos
+────────────────────────────────────
+TOTAL:                 ~20-30 minutos
+
+
+════════════════════════════════════════════════════════════════
+    📚 DOCUMENTAÇÃO NO PENDRIVE
+════════════════════════════════════════════════════════════════
+
+O script copiar-para-pendrive.ps1 também copia:
+
+✅ RELATORIO-COMPLETO-PARA-OUTRO-PC.md  (leia primeiro!)
+✅ LISTA-IMAGENS-PARA-COPIAR.txt
+✅ LEIA-ME-PRIMEIRO.md
+✅ COMANDOS-RAPIDOS.md
+✅ prompt-ia-simples.txt
+
+
+════════════════════════════════════════════════════════════════
+    🔥 COMANDOS RÁPIDOS NO OUTRO PC
+════════════════════════════════════════════════════════════════
+
+# Verificar instalações
+flutter --version
+firebase --version
+
+# Build e Deploy
+cd D:\Projetos\boratreinar
+flutter clean
+flutter pub get
+flutter build web --release
+firebase deploy --only hosting
+
+# Testar
+start https://gotreiinar.web.app
+
+
+════════════════════════════════════════════════════════════════
+    ✅ CHECKLIST PARA OUTRO PC
+════════════════════════════════════════════════════════════════
+
+Antes de começar:
+[ ] Pendrive com projeto/imagens
+[ ] Internet disponível (para instalar Flutter/Firebase)
+
+Setup:
+[ ] Flutter instalado e no PATH
+[ ] Firebase CLI instalado
+[ ] Firebase login OK (firebase login)
+
+Projeto:
+[ ] Pasta boratreinar copiada
+[ ] Imagens copiadas (12 PNGs)
+[ ] flutter pub get executado
+
+Deploy:
+[ ] flutter build web --release OK
+[ ] firebase deploy --only hosting OK
+[ ] App abrindo em https://gotreiinar.web.app
+[ ] Bolt aparecendo na tela de login
+
+
+════════════════════════════════════════════════════════════════
+    🎨 SE NÃO TIVER AS IMAGENS
+════════════════════════════════════════════════════════════════
+
+Você pode gerar novas com IA no outro PC:
+
+1. Abra: prompt-ia-simples.txt
+2. Copie o prompt
+3. Cole em ChatGPT, Leonardo.AI, Midjourney ou Ideogram
+4. Gere imagem 1200x1200px com fundo azul #0D1B2A
+5. Salve como: assets\bolt\expressions\ready.png
+6. Rebuild e deploy
+
+
+════════════════════════════════════════════════════════════════
+    🚨 IMPORTANTE
+════════════════════════════════════════════════════════════════
+
+⭐ Imagem MAIS IMPORTANTE: ready.png
+   (usada na tela de login)
+
+Se tiver que escolher apenas UMA imagem, copie esta!
+
+
+════════════════════════════════════════════════════════════════
+    📞 PROBLEMAS NO OUTRO PC?
+════════════════════════════════════════════════════════════════
+
+Leia no pendrive:
+1. RELATORIO-COMPLETO-PARA-OUTRO-PC.md - guia completo
+2. LEIA-ME-PRIMEIRO.md - início rápido
+3. COMANDOS-RAPIDOS.md - comandos essenciais
+
+
+════════════════════════════════════════════════════════════════
+    🎯 RESULTADO FINAL
+════════════════════════════════════════════════════════════════
+
+Após setup no outro PC, você terá:
+
+✅ App Bora Treinar rodando
+✅ URL: https://gotreiinar.web.app
+✅ Bolt gigante na tela de login
+✅ Tema azul escuro (#0D1B2A)
+✅ Sistema de gamificação completo
+
+
+════════════════════════════════════════════════════════════════
+    💡 DICA FINAL
+════════════════════════════════════════════════════════════════
+
+MAIS FÁCIL: Copie a pasta INTEIRA boratreinar\
+Isso garante que você terá tudo que precisa!
+
+
+════════════════════════════════════════════════════════════════
+
+Boa sorte no outro computador! 🚀
+
+════════════════════════════════════════════════════════════════
