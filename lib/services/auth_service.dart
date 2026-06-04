@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../models/user_profile.dart';
+import 'auth_redirect.dart';
 
 class AuthService {
   SupabaseClient get _client => Supabase.instance.client;
@@ -10,6 +12,15 @@ class AuthService {
   Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
 
   Future<void> signInWithGoogle() async {
+    if (kIsWeb) {
+      final response = await _client.auth.getOAuthSignInUrl(
+        provider: OAuthProvider.google,
+        redirectTo: Uri.base.origin,
+      );
+      redirectToUrl(response.url);
+      return;
+    }
+
     await _client.auth.signInWithOAuth(OAuthProvider.google);
   }
 

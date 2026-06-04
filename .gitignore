@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 .firebase/
+client_secret_*.json
 
 # IntelliJ related
 *.iml
