@@ -24,7 +24,6 @@ class _AuthGateState extends State<AuthGate> {
   void initState() {
     super.initState();
     _session = _authService.currentSession;
-    _syncProfile();
     _subscription = _authService.authStateChanges.listen((state) {
       setState(() {
         _session = state.session;
@@ -32,7 +31,7 @@ class _AuthGateState extends State<AuthGate> {
       });
       _syncProfile();
     });
-    _loading = false;
+    _loadSession();
   }
 
   @override
@@ -47,6 +46,20 @@ class _AuthGateState extends State<AuthGate> {
       await _authService.syncCurrentUserProfile();
     } catch (_) {
       // Profile sync is retried on the next auth event or profile save.
+    }
+  }
+
+  Future<void> _loadSession() async {
+    try {
+      await _authService.completePendingSignIn();
+      await _syncProfile();
+    } finally {
+      if (mounted) {
+        setState(() {
+          _session = _authService.currentSession;
+          _loading = false;
+        });
+      }
     }
   }
 

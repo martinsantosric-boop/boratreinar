@@ -12,6 +12,17 @@ class AuthService {
 
   Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
 
+  Future<void> completePendingSignIn() async {
+    final authCode = Uri.base.queryParameters['code'];
+    if (authCode == null || authCode.isEmpty) return;
+
+    try {
+      await _client.auth.exchangeCodeForSession(authCode);
+    } on AuthException {
+      if (_client.auth.currentSession == null) rethrow;
+    }
+  }
+
   Future<void> signInWithGoogle() async {
     if (kIsWeb) {
       final response = await _client.auth.getOAuthSignInUrl(
