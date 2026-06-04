@@ -121,12 +121,11 @@ class DailyMission {
       MissionType.takeSteps10k,
     ];
 
-    return [
+    return {
       missions[(random) % missions.length],
       missions[(random + 3) % missions.length],
       missions[(random + 5) % missions.length],
-    ]
-        .toSet()
+    }
         .map((type) => DailyMission(type: type, isCompleted: false, date: date))
         .toList();
   }

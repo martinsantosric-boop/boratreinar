@@ -205,7 +205,7 @@ class GamificationService {
   ) {
     switch (type) {
       case AchievementType.firstRun:
-        return allRuns.length >= 1;
+        return allRuns.isNotEmpty;
       case AchievementType.streak3:
         return state.currentStreak >= 3;
       case AchievementType.streak7:

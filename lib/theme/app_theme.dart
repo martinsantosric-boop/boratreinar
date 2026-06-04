@@ -5,7 +5,6 @@ class AppTheme {
     // Cores baseadas no personagem Bolt
     const primary = Color(0xFF0D1B2A); // Azul escuro do fundo
     const secondary = Color(0xFF1E88E5); // Azul do Bolt
-    const accent = Color(0xFFFFD700); // Dourado para destaques
     const surface = Color(0xFFF5F5F5); // Cinza muito claro
 
     final colorScheme = ColorScheme.fromSeed(
