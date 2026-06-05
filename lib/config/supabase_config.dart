@@ -13,4 +13,9 @@ class SupabaseConfig {
     'SUPABASE_AUTH_REDIRECT_URL',
     defaultValue: 'https://gotreiinar.web.app',
   );
+
+  static const nativeAuthRedirectUrl = String.fromEnvironment(
+    'SUPABASE_NATIVE_AUTH_REDIRECT_URL',
+    defaultValue: 'com.tecnicorikardo.cooper-maratonista://login-callback',
+  );
 }

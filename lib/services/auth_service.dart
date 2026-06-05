@@ -33,7 +33,10 @@ class AuthService {
       return;
     }
 
-    await _client.auth.signInWithOAuth(OAuthProvider.google);
+    await _client.auth.signInWithOAuth(
+      OAuthProvider.google,
+      redirectTo: SupabaseConfig.nativeAuthRedirectUrl,
+    );
   }
 
   Future<void> signOut() async {
