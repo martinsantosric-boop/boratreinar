@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models/geo_sample.dart';
@@ -27,7 +28,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   final _tracker = LocationTracker();
   final _storage = RunStorageService();
   final _stepCounter = StepCounterService();
-  final _apitoPlayer = AudioPlayer();
+  final AudioPlayer? _apitoPlayer = kIsWeb ? null : AudioPlayer();
   final _route = <GeoSample>[];
   StreamSubscription<LocationUpdate>? _locationSubscription;
   StreamSubscription<int>? _stepSubscription;
@@ -53,7 +54,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
     _stepSubscription?.cancel();
     _tracker.stop();
     _stepCounter.stop();
-    _apitoPlayer.dispose();
+    _apitoPlayer?.dispose();
     super.dispose();
   }
 
@@ -66,10 +67,12 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   Future<void> _executarAberturaMascote() async {
     setState(() => _mostrarMascote = true);
 
-    try {
-      await _apitoPlayer.play(AssetSource('apito.mp3'));
-    } catch (e) {
-      debugPrint('Erro ao tocar apito: $e');
+    if (_apitoPlayer != null) {
+      try {
+        await _apitoPlayer.play(AssetSource('apito.mp3'));
+      } catch (e) {
+        debugPrint('Erro ao tocar apito: $e');
+      }
     }
 
     await Future.delayed(const Duration(seconds: 3));
