@@ -1,5 +1,6 @@
 import 'package:cooper_maratonista/models/run_session.dart';
 import 'package:cooper_maratonista/models/user_profile.dart';
+import 'package:cooper_maratonista/services/gamification_service.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -66,5 +67,27 @@ void main() {
 
     expect(run.estimatedSteps, 4026);
     expect(run.stepsPerKm, 1342);
+  });
+
+  test('run shorter than 30 minutes does not earn xp', () {
+    final gamification = GamificationService();
+    final run = buildRun(
+      duration: const Duration(minutes: 29, seconds: 59),
+      distanceMeters: 5000,
+    );
+
+    expect(gamification.isEligibleForRewards(run), isFalse);
+    expect(gamification.calculateRunXp(run), 0);
+  });
+
+  test('run with at least 30 minutes earns xp', () {
+    final gamification = GamificationService();
+    final run = buildRun(
+      duration: const Duration(minutes: 30),
+      distanceMeters: 5000,
+    );
+
+    expect(gamification.isEligibleForRewards(run), isTrue);
+    expect(gamification.calculateRunXp(run), greaterThan(0));
   });
 }

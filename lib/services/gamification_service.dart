@@ -12,6 +12,7 @@ import '../models/run_session.dart';
 
 class GamificationService {
   static const _stateKey = 'gamification_state';
+  static const minimumRewardDuration = Duration(minutes: 30);
 
   Future<GamificationState> loadState() async {
     final prefs = await SharedPreferences.getInstance();
@@ -39,6 +40,8 @@ class GamificationService {
 
   /// Calcula XP ganho em uma corrida
   int calculateRunXp(RunSession run) {
+    if (!isEligibleForRewards(run)) return 0;
+
     int xp = 0;
 
     // XP base por completar a corrida
@@ -71,6 +74,10 @@ class GamificationService {
     return xp;
   }
 
+  bool isEligibleForRewards(RunSession run) {
+    return run.duration >= minimumRewardDuration;
+  }
+
   /// Processa uma nova corrida e atualiza o estado de gamificação
   Future<GamificationResult> processRun(
     RunSession run,
@@ -81,6 +88,10 @@ class GamificationService {
 
     // Adiciona XP da corrida
     final runXp = calculateRunXp(run);
+    if (runXp == 0) {
+      return GamificationResult.noRewards(currentStreak: state.currentStreak);
+    }
+
     newState = newState.copyWith(totalXp: state.totalXp + runXp);
 
     // Atualiza streak
@@ -341,6 +352,16 @@ class GamificationResult {
     required this.streakIncreased,
     required this.newStreak,
   });
+
+  const GamificationResult.noRewards({required int currentStreak})
+    : totalXpGained = 0,
+      runXp = 0,
+      newlyUnlockedAchievements = const [],
+      completedMissions = const [],
+      leveledUp = false,
+      newLeague = null,
+      streakIncreased = false,
+      newStreak = currentStreak;
 
   final int totalXpGained;
   final int runXp;

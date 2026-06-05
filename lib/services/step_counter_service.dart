@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:pedometer/pedometer.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -8,6 +9,8 @@ class StepCounterService {
   int? _baselineSteps;
 
   Future<void> ensureReady() async {
+    if (kIsWeb) return;
+
     final status = await Permission.activityRecognition.request();
     if (!status.isGranted) {
       throw const StepCounterException('Permissao de atividade fisica negada.');
@@ -16,6 +19,11 @@ class StepCounterService {
 
   Stream<int> start() {
     final controller = StreamController<int>();
+
+    if (kIsWeb) {
+      controller.onListen = () => controller.add(0);
+      return controller.stream;
+    }
 
     _subscription = Pedometer.stepCountStream.listen(
       (event) {
