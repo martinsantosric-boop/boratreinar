@@ -17,6 +17,7 @@ class AuthGate extends StatefulWidget {
 class _AuthGateState extends State<AuthGate> {
   final _authService = AuthService();
   StreamSubscription<AuthState>? _subscription;
+  StreamSubscription<Uri>? _authLinkSubscription;
   Session? _session;
   var _loading = true;
 
@@ -31,12 +32,18 @@ class _AuthGateState extends State<AuthGate> {
       });
       _syncProfile();
     });
+    _authLinkSubscription = _authService.authLinkChanges.listen(
+      _handleAuthLink,
+      onError: (error) =>
+          debugPrint('Falha ao receber callback de login: $error'),
+    );
     _loadSession();
   }
 
   @override
   void dispose() {
     _subscription?.cancel();
+    _authLinkSubscription?.cancel();
     super.dispose();
   }
 
@@ -61,6 +68,21 @@ class _AuthGateState extends State<AuthGate> {
         });
       }
     }
+  }
+
+  Future<void> _handleAuthLink(Uri uri) async {
+    await Future<void>.delayed(const Duration(milliseconds: 350));
+
+    if (_authService.currentSession == null) {
+      await _authService.completeAuthCallback(uri);
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _session = _authService.currentSession;
+      _loading = false;
+    });
+    await _syncProfile();
   }
 
   @override

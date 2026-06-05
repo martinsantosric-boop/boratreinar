@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:app_links/app_links.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../config/supabase_config.dart';
@@ -6,20 +7,46 @@ import '../models/user_profile.dart';
 import 'auth_redirect.dart';
 
 class AuthService {
+  final _appLinks = AppLinks();
+
   SupabaseClient get _client => Supabase.instance.client;
 
   Session? get currentSession => _client.auth.currentSession;
 
   Stream<AuthState> get authStateChanges => _client.auth.onAuthStateChange;
 
+  Stream<Uri> get authLinkChanges => _appLinks.uriLinkStream;
+
   Future<void> completePendingSignIn() async {
-    final authCode = Uri.base.queryParameters['code'];
-    if (authCode == null || authCode.isEmpty) return;
+    if (kIsWeb) {
+      await completeAuthCallback(Uri.base);
+      return;
+    }
 
     try {
-      await _client.auth.exchangeCodeForSession(authCode);
-    } on AuthException {
-      if (_client.auth.currentSession == null) rethrow;
+      final initialLink = await _appLinks.getInitialLink();
+      if (initialLink != null) {
+        await completeAuthCallback(initialLink);
+      }
+    } catch (error) {
+      debugPrint('Falha ao recuperar link inicial de login: $error');
+    }
+  }
+
+  Future<bool> completeAuthCallback(Uri uri) async {
+    if (!_isAuthCallback(uri)) return false;
+
+    try {
+      await _client.auth.getSessionFromUrl(uri);
+      return _client.auth.currentSession != null;
+    } on AuthException catch (error) {
+      if (_client.auth.currentSession != null) return true;
+      debugPrint('Falha ao concluir login pelo callback: ${error.message}');
+      return false;
+    } catch (error) {
+      if (_client.auth.currentSession != null) return true;
+      debugPrint('Falha ao concluir login pelo callback: $error');
+      return false;
     }
   }
 
@@ -69,5 +96,12 @@ class AuthService {
       'age': profile.age,
       'updated_at': DateTime.now().toIso8601String(),
     });
+  }
+
+  bool _isAuthCallback(Uri uri) {
+    return uri.queryParameters.containsKey('code') ||
+        uri.fragment.contains('access_token') ||
+        uri.fragment.contains('error_description') ||
+        uri.queryParameters.containsKey('error_description');
   }
 }
