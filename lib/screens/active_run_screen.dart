@@ -58,21 +58,18 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   }
 
   Future<void> _startWithMascote() async {
-    // DESATIVADO TEMPORARIAMENTE - Remover fundo do GIF primeiro
-    // await _executarAberturaMascote();
-    // if (!mounted) return;
+    await _executarAberturaMascote();
+    if (!mounted) return;
     await _start();
   }
 
   Future<void> _executarAberturaMascote() async {
-    print('✅ Iniciando animação do mascote (GIF)');
     setState(() => _mostrarMascote = true);
 
     try {
       await _apitoPlayer.play(AssetSource('apito.mp3'));
-      print('✅ Apito tocando');
     } catch (e) {
-      print('❌ Erro ao tocar apito: $e');
+      debugPrint('Erro ao tocar apito: $e');
     }
 
     await Future.delayed(const Duration(seconds: 3));
@@ -80,7 +77,6 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
     if (!mounted) return;
 
     setState(() => _mostrarMascote = false);
-    print('✅ Animação do mascote concluída');
   }
 
   Future<void> _start() async {
@@ -311,8 +307,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
           ),
           if (_mostrarMascote)
             Positioned.fill(
-              child: Container(
-                color: Colors.black.withValues(alpha: 0.85),
+              child: IgnorePointer(
                 child: Center(
                   child: SizedBox(
                     width: MediaQuery.of(context).size.width * 0.9,

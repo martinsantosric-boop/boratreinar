@@ -70,7 +70,6 @@ flutter:
   assets:
     - assets/apito.mp3
     - assets/bolt/abertura_mascote.gif
-    - assets/bolt/abertura_mascote.mp4
     - assets/bolt/boratreinargift.mp4
     - assets/bolt/expressions/
     - assets/bolt/leagues/
