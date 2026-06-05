@@ -40,7 +40,6 @@ dependencies:
   pedometer: 4.1.1
   permission_handler: ^12.0.1
   supabase_flutter: ^2.12.4
-  app_links: ^6.4.1
   web: ^1.1.1
   video_player: ^2.8.0
   audioplayers: ^6.6.0
