@@ -19,13 +19,19 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
+  late final TextEditingController _displayNameController;
   late final TextEditingController _weightController;
   late final TextEditingController _heightController;
   late final TextEditingController _ageController;
+  late String _gender;
 
   @override
   void initState() {
     super.initState();
+    _displayNameController = TextEditingController(
+      text: widget.profile.displayName,
+    );
+    _gender = widget.profile.gender;
     _weightController = TextEditingController(
       text: _formatPositiveDouble(widget.profile.bodyWeightKg, decimals: 1),
     );
@@ -41,6 +47,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   void didUpdateWidget(covariant ProfileScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.profile == widget.profile) return;
+    _displayNameController.text = widget.profile.displayName;
+    _gender = widget.profile.gender;
     _weightController.text = _formatPositiveDouble(
       widget.profile.bodyWeightKg,
       decimals: 1,
@@ -59,6 +67,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void dispose() {
+    _displayNameController.dispose();
     _weightController.dispose();
     _heightController.dispose();
     _ageController.dispose();
@@ -69,9 +78,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (!_formKey.currentState!.validate()) return;
 
     final profile = UserProfile(
-      bodyWeightKg: double.parse(_weightController.text.replaceAll(',', '.')),
-      heightCm: double.parse(_heightController.text.replaceAll(',', '.')),
-      age: int.parse(_ageController.text),
+      displayName: _displayNameController.text.trim(),
+      gender: _gender,
+      bodyWeightKg: _optionalDouble(_weightController.text),
+      heightCm: _optionalDouble(_heightController.text),
+      age: _optionalInt(_ageController.text),
     );
 
     await widget.onSaveProfile(profile);
@@ -84,6 +95,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profile = UserProfile(
+      displayName: _displayNameController.text.trim(),
+      gender: _gender,
       bodyWeightKg:
           double.tryParse(_weightController.text.replaceAll(',', '.')) ??
           widget.profile.bodyWeightKg,
@@ -113,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 const SizedBox(height: 8),
                 Text(
                   'Peso, altura e idade refinam calorias e estimativas '
-                  'de passos.',
+                  'de passos. Esses dados sao opcionais.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                     color: Colors.white.withValues(alpha: 0.86),
                   ),
@@ -128,6 +141,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
           child: Column(
             children: [
               TextFormField(
+                controller: _displayNameController,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(
+                  labelText: 'Como gostaria de ser chamado',
+                  prefixIcon: Icon(Icons.badge_outlined),
+                ),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _gender.isEmpty ? null : _gender,
+                decoration: const InputDecoration(
+                  labelText: 'Sexo',
+                  prefixIcon: Icon(Icons.wc_outlined),
+                ),
+                items: const [
+                  DropdownMenuItem(
+                    value: 'masculino',
+                    child: Text('Masculino'),
+                  ),
+                  DropdownMenuItem(value: 'feminino', child: Text('Feminino')),
+                  DropdownMenuItem(value: 'outros', child: Text('Outros')),
+                ],
+                onChanged: (value) => setState(() => _gender = value ?? ''),
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
                 controller: _weightController,
                 keyboardType: const TextInputType.numberWithOptions(
                   decimal: true,
@@ -138,6 +177,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 onChanged: (_) => setState(() {}),
                 validator: (value) {
+                  if ((value ?? '').trim().isEmpty) return null;
                   final parsed = double.tryParse(
                     (value ?? '').replaceAll(',', '.'),
                   );
@@ -159,6 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 onChanged: (_) => setState(() {}),
                 validator: (value) {
+                  if ((value ?? '').trim().isEmpty) return null;
                   final parsed = double.tryParse(
                     (value ?? '').replaceAll(',', '.'),
                   );
@@ -178,6 +219,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 onChanged: (_) => setState(() {}),
                 validator: (value) {
+                  if ((value ?? '').trim().isEmpty) return null;
                   final parsed = int.tryParse(value ?? '');
                   if (parsed == null || parsed < 10 || parsed > 100) {
                     return 'Informe uma idade valida.';
@@ -217,5 +259,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ],
     );
+  }
+
+  double _optionalDouble(String value) {
+    return double.tryParse(value.trim().replaceAll(',', '.')) ?? 0;
+  }
+
+  int _optionalInt(String value) {
+    return int.tryParse(value.trim()) ?? 0;
   }
 }

@@ -39,6 +39,29 @@ class AuthService {
     );
   }
 
+  Future<void> signInWithEmail({
+    required String email,
+    required String password,
+  }) async {
+    await _client.auth.signInWithPassword(email: email, password: password);
+  }
+
+  Future<AuthResponse> signUpWithEmail({
+    required String email,
+    required String password,
+    required UserProfile profile,
+  }) async {
+    return _client.auth.signUp(
+      email: email,
+      password: password,
+      data: {
+        if (profile.displayName.trim().isNotEmpty)
+          'full_name': profile.displayName.trim(),
+        if (profile.gender.trim().isNotEmpty) 'gender': profile.gender.trim(),
+      },
+    );
+  }
+
   Future<void> signOut() async {
     await _client.auth.signOut();
   }
@@ -52,6 +75,7 @@ class AuthService {
       'id': user.id,
       'email': user.email,
       'full_name': metadata['full_name'] ?? metadata['name'],
+      'gender': metadata['gender'],
       'avatar_url': metadata['avatar_url'] ?? metadata['picture'],
       'updated_at': DateTime.now().toIso8601String(),
     });
@@ -64,6 +88,10 @@ class AuthService {
     await _client.from('profiles').upsert({
       'id': user.id,
       'email': user.email,
+      'full_name': profile.displayName.trim().isEmpty
+          ? null
+          : profile.displayName.trim(),
+      'gender': profile.gender.trim().isEmpty ? null : profile.gender.trim(),
       'body_weight_kg': profile.bodyWeightKg,
       'height_cm': profile.heightCm,
       'age': profile.age,

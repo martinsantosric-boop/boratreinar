@@ -61,11 +61,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _startRun() async {
-    if (!_hasUserProfile) {
-      _requestProfileData();
-      return;
-    }
-
     final run = await Navigator.of(context).push<RunSession>(
       MaterialPageRoute(builder: (_) => ActiveRunScreen(profile: _profile)),
     );
@@ -121,11 +116,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _requestProfileData() {
-    setState(() => _selectedIndex = 3);
+    setState(() => _selectedIndex = 5);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
-          'Informe peso, altura e idade para melhorar as analises.',
+          'Atualize seus dados quando quiser para melhorar as analises.',
         ),
       ),
     );

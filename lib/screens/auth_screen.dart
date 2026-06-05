@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../services/auth_service.dart';
 import '../widgets/bolt_login_media.dart';
+import '../widgets/email_auth_dialog.dart';
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -31,6 +32,10 @@ class _AuthScreenState extends State<AuthScreen> {
         setState(() => _loading = false);
       }
     }
+  }
+
+  Future<void> _openEmailLogin() {
+    return EmailAuthDialog.show(context);
   }
 
   @override
@@ -183,12 +188,26 @@ class _AuthScreenState extends State<AuthScreen> {
                                 ),
                                 SizedBox(height: compact ? 24 : 32),
                                 FilledButton.icon(
+                                  onPressed: _loading ? null : _openEmailLogin,
+                                  style: FilledButton.styleFrom(
+                                    backgroundColor: const Color(0xFF0D1B2A),
+                                    foregroundColor: Colors.white,
+                                    minimumSize: const Size.fromHeight(52),
+                                  ),
+                                  icon: const Icon(Icons.login),
+                                  label: const Text('Login'),
+                                ),
+                                const SizedBox(height: 12),
+                                FilledButton.icon(
                                   onPressed: _loading
                                       ? null
                                       : _signInWithGoogle,
                                   style: FilledButton.styleFrom(
-                                    backgroundColor: const Color(0xFF0D1B2A),
-                                    foregroundColor: Colors.white,
+                                    backgroundColor: Colors.white,
+                                    foregroundColor: const Color(0xFF0D1B2A),
+                                    side: const BorderSide(
+                                      color: Color(0xFF0D1B2A),
+                                    ),
                                     minimumSize: const Size.fromHeight(52),
                                   ),
                                   icon: _loading
