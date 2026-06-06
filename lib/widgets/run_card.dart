@@ -43,6 +43,8 @@ class RunCard extends StatelessWidget {
                           color: Colors.black54,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      _SourceChip(isGpsTracked: run.isGpsTracked),
                     ],
                   ),
                 ),
@@ -59,9 +61,12 @@ class RunCard extends StatelessWidget {
               children: [
                 _Info(label: 'Tempo', value: formatDuration(run.duration)),
                 _Info(label: 'Pace', value: formatPace(run.paceSecondsPerKm)),
-                _Info(label: 'Passos', value: '${run.estimatedSteps}'),
                 _Info(
-                  label: 'Calorias',
+                  label: run.steps > 0 ? 'Passos' : 'Passos est.',
+                  value: '${run.estimatedSteps}',
+                ),
+                _Info(
+                  label: 'Calorias est.',
                   value: '${run.estimatedCalories} kcal',
                 ),
               ],
@@ -74,7 +79,9 @@ class RunCard extends StatelessWidget {
                   value: formatSpeed(run.calculatedMaxSpeedKmh),
                 ),
                 _Info(
-                  label: 'Altimetria',
+                  label: run.elevationGainMeters != null
+                      ? 'Altimetria'
+                      : 'Altim. est.',
                   value: formatElevationGain(run.calculatedElevationGainMeters),
                 ),
                 _Info(
@@ -92,6 +99,37 @@ class RunCard extends StatelessWidget {
               Text(run.notes!),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SourceChip extends StatelessWidget {
+  const _SourceChip({required this.isGpsTracked});
+
+  final bool isGpsTracked;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = isGpsTracked ? Colors.green : Colors.blueGrey;
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: color.shade50,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.shade200),
+        ),
+        child: Text(
+          isGpsTracked ? 'GPS' : 'Manual',
+          style: TextStyle(
+            color: color.shade800,
+            fontSize: 11,
+            fontWeight: FontWeight.w800,
+          ),
         ),
       ),
     );

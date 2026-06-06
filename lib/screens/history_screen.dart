@@ -328,7 +328,7 @@ class _HistoryEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'Seu historico de corrida vai aparecer aqui.',
+              'Quando voce concluir uma corrida com GPS, ela aparecera aqui. Voce tambem pode registrar manualmente um treino feito fora do app.',
               textAlign: TextAlign.center,
               style: Theme.of(context).textTheme.titleMedium,
             ),

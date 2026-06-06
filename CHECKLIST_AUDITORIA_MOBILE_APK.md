@@ -94,20 +94,20 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 
 ### Perfil
 
-- [ ] Informar campos obrigatorios e opcionais.
-- [ ] Explicar que calorias sao estimadas.
-- [ ] Explicar calculo de passos/passada.
-- [ ] Indicar "passos estimados" quando nao vierem do sensor.
-- [ ] Indicar altimetria como estimativa quando vier do GPS.
-- [ ] Criar area "Como calculamos suas estatisticas?".
+- [x] Informar campos obrigatorios e opcionais.
+- [x] Explicar que calorias sao estimadas.
+- [x] Explicar calculo de passos/passada.
+- [x] Indicar "passos estimados" quando nao vierem do sensor.
+- [x] Indicar altimetria como estimativa quando vier do GPS.
+- [x] Criar area "Como calculamos suas estatisticas?".
 
 ### Historico
 
-- [ ] Melhorar estado vazio com orientacao sobre GPS e registro manual.
-- [ ] Diferenciar corrida com GPS de registro manual.
+- [x] Melhorar estado vazio com orientacao sobre GPS e registro manual.
+- [x] Diferenciar corrida com GPS de registro manual.
 - [ ] Mostrar XP ganho em cada treino.
 - [ ] Mostrar missoes concluidas em cada treino.
-- [ ] Indicar se o treino foi GPS ou manual.
+- [x] Indicar se o treino foi GPS ou manual.
 
 ## Ajustes Gerais Mobile/APK
 

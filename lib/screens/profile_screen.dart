@@ -257,6 +257,44 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ],
         ),
+        const SizedBox(height: 16),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Como calculamos suas estatisticas?',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const _CalculationNote(
+                  icon: Icons.local_fire_department_outlined,
+                  text:
+                      'Calorias sao estimadas usando peso, tempo, distancia e intensidade do treino.',
+                ),
+                const _CalculationNote(
+                  icon: Icons.directions_walk,
+                  text:
+                      'Passos usam o sensor quando disponivel. Sem sensor, estimamos pela altura e distancia.',
+                ),
+                const _CalculationNote(
+                  icon: Icons.terrain,
+                  text:
+                      'Altimetria vem do GPS e pode variar conforme sinal, cidade e aparelho.',
+                ),
+                const _CalculationNote(
+                  icon: Icons.badge_outlined,
+                  text:
+                      'Nome e sexo sao opcionais. Peso, altura e idade melhoram as estimativas.',
+                ),
+              ],
+            ),
+          ),
+        ),
       ],
     );
   }
@@ -267,5 +305,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   int _optionalInt(String value) {
     return int.tryParse(value.trim()) ?? 0;
+  }
+}
+
+class _CalculationNote extends StatelessWidget {
+  const _CalculationNote({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
   }
 }

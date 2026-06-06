@@ -110,6 +110,12 @@ class RunSession {
     return (estimatedSteps / distanceKm).round();
   }
 
+  bool get isGpsTracked {
+    return route.isNotEmpty || locationDebugLogs.any((log) => log.accepted);
+  }
+
+  bool get isManualEntry => !isGpsTracked;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
