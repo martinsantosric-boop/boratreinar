@@ -1,4 +1,5 @@
 import 'package:cooper_maratonista/models/run_session.dart';
+import 'package:cooper_maratonista/models/geo_sample.dart';
 import 'package:cooper_maratonista/models/user_profile.dart';
 import 'package:cooper_maratonista/services/gamification_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -67,6 +68,80 @@ void main() {
 
     expect(run.estimatedSteps, 4026);
     expect(run.stepsPerKm, 1342);
+  });
+
+  test('run calculates cadence from estimated steps and duration', () {
+    final run = buildRun(
+      duration: const Duration(minutes: 30),
+      distanceMeters: 3000,
+      heightCm: 180,
+    );
+
+    expect(run.averageCadenceSpm, 134);
+  });
+
+  test('run reads max speed and elevation from GPS samples', () {
+    final startedAt = DateTime(2026, 5, 30, 8);
+    final run = RunSession(
+      id: 'gps-run',
+      startedAt: startedAt,
+      endedAt: startedAt.add(const Duration(minutes: 10)),
+      duration: const Duration(minutes: 10),
+      distanceMeters: 1000,
+      route: [
+        GeoSample(
+          latitude: -23.0,
+          longitude: -46.0,
+          recordedAt: startedAt,
+          accuracy: 8,
+          altitudeMeters: 700,
+          speedMetersPerSecond: 2,
+        ),
+        GeoSample(
+          latitude: -23.001,
+          longitude: -46.001,
+          recordedAt: startedAt.add(const Duration(minutes: 5)),
+          accuracy: 8,
+          altitudeMeters: 704,
+          speedMetersPerSecond: 3.5,
+        ),
+        GeoSample(
+          latitude: -23.002,
+          longitude: -46.002,
+          recordedAt: startedAt.add(const Duration(minutes: 10)),
+          accuracy: 8,
+          altitudeMeters: 703,
+          speedMetersPerSecond: 2.4,
+        ),
+      ],
+    );
+
+    expect(run.calculatedMaxSpeedKmh, 12.6);
+    expect(run.calculatedElevationGainMeters, 4);
+  });
+
+  test('run persists optional advanced metrics', () {
+    final run = buildRun(
+      duration: const Duration(minutes: 40),
+      distanceMeters: 7000,
+    );
+    final json = RunSession(
+      id: run.id,
+      startedAt: run.startedAt,
+      endedAt: run.endedAt,
+      duration: run.duration,
+      distanceMeters: run.distanceMeters,
+      route: run.route,
+      maxSpeedKmh: 13.8,
+      elevationGainMeters: 45,
+      averageHeartRateBpm: 148,
+    ).toJson();
+
+    final restored = RunSession.fromJson(json);
+
+    expect(restored.calculatedMaxSpeedKmh, 13.8);
+    expect(restored.calculatedElevationGainMeters, 45);
+    expect(restored.averageHeartRateBpm, 148);
   });
 
   test('run shorter than 30 minutes does not earn xp', () {

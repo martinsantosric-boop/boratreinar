@@ -59,10 +59,31 @@ class RunCard extends StatelessWidget {
               children: [
                 _Info(label: 'Tempo', value: formatDuration(run.duration)),
                 _Info(label: 'Pace', value: formatPace(run.paceSecondsPerKm)),
-                _Info(label: 'Passos', value: '${run.steps}'),
+                _Info(label: 'Passos', value: '${run.estimatedSteps}'),
                 _Info(
                   label: 'Calorias',
                   value: '${run.estimatedCalories} kcal',
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _Info(
+                  label: 'Vel. max',
+                  value: formatSpeed(run.calculatedMaxSpeedKmh),
+                ),
+                _Info(
+                  label: 'Altimetria',
+                  value: formatElevationGain(run.calculatedElevationGainMeters),
+                ),
+                _Info(
+                  label: 'Cadencia',
+                  value: formatCadence(run.averageCadenceSpm),
+                ),
+                _Info(
+                  label: 'FC media',
+                  value: formatHeartRate(run.averageHeartRateBpm),
                 ),
               ],
             ),

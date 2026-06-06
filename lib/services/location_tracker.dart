@@ -159,6 +159,8 @@ class LocationTracker {
       longitude: position.longitude,
       recordedAt: position.timestamp,
       accuracy: position.accuracy,
+      altitudeMeters: position.altitude,
+      speedMetersPerSecond: position.speed > 0 ? position.speed : null,
     );
   }
 }

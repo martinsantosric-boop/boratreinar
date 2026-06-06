@@ -13,6 +13,9 @@ class RunSession {
     this.bodyWeightKg = 70,
     this.heightCm = 170,
     this.age = 30,
+    this.maxSpeedKmh,
+    this.elevationGainMeters,
+    this.averageHeartRateBpm,
   });
 
   final String id;
@@ -26,6 +29,9 @@ class RunSession {
   final double bodyWeightKg;
   final double heightCm;
   final int age;
+  final double? maxSpeedKmh;
+  final double? elevationGainMeters;
+  final int? averageHeartRateBpm;
 
   double get distanceKm => distanceMeters / 1000;
 
@@ -45,6 +51,48 @@ class RunSession {
     final minutes = duration.inSeconds / 60;
     final calories = _metForSpeed(averageSpeedKmh) * 3.5 * bodyWeightKg / 200;
     return (calories * minutes).round();
+  }
+
+  double get calculatedMaxSpeedKmh {
+    if (maxSpeedKmh != null && maxSpeedKmh! > 0) return maxSpeedKmh!;
+
+    var fastestMetersPerSecond = 0.0;
+    for (final sample in route) {
+      final speed = sample.speedMetersPerSecond;
+      if (speed != null && speed > fastestMetersPerSecond) {
+        fastestMetersPerSecond = speed;
+      }
+    }
+
+    return fastestMetersPerSecond * 3.6;
+  }
+
+  double get calculatedElevationGainMeters {
+    if (elevationGainMeters != null && elevationGainMeters! > 0) {
+      return elevationGainMeters!;
+    }
+
+    var gain = 0.0;
+    double? previousAltitude;
+
+    for (final sample in route) {
+      final altitude = sample.altitudeMeters;
+      if (altitude == null) continue;
+
+      if (previousAltitude != null) {
+        final delta = altitude - previousAltitude;
+        if (delta > 1.5) gain += delta;
+      }
+
+      previousAltitude = altitude;
+    }
+
+    return gain;
+  }
+
+  int get averageCadenceSpm {
+    if (duration.inSeconds == 0) return 0;
+    return (estimatedSteps / (duration.inSeconds / 60)).round();
   }
 
   int get estimatedSteps {
@@ -72,6 +120,9 @@ class RunSession {
       'bodyWeightKg': bodyWeightKg,
       'heightCm': heightCm,
       'age': age,
+      'maxSpeedKmh': maxSpeedKmh,
+      'elevationGainMeters': elevationGainMeters,
+      'averageHeartRateBpm': averageHeartRateBpm,
     };
   }
 
@@ -90,6 +141,9 @@ class RunSession {
       bodyWeightKg: ((json['bodyWeightKg'] as num?) ?? 70).toDouble(),
       heightCm: ((json['heightCm'] as num?) ?? 170).toDouble(),
       age: ((json['age'] as num?) ?? 30).toInt(),
+      maxSpeedKmh: (json['maxSpeedKmh'] as num?)?.toDouble(),
+      elevationGainMeters: (json['elevationGainMeters'] as num?)?.toDouble(),
+      averageHeartRateBpm: (json['averageHeartRateBpm'] as num?)?.toInt(),
     );
   }
 

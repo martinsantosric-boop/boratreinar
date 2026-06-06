@@ -184,7 +184,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
       endedAt: DateTime.now(),
       duration: _elapsed,
       distanceMeters: _distanceMeters,
-      route: const [],
+      route: List.unmodifiable(_route),
       steps: _steps,
       bodyWeightKg: widget.profile.bodyWeightKg,
       heightCm: widget.profile.heightCm,
@@ -255,8 +255,13 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
                     label: 'Velocidade',
                     value: !hasReliableDistance || _elapsed.inSeconds == 0
                         ? '--'
-                        : '${previewRun.averageSpeedKmh.toStringAsFixed(1)} km/h',
+                        : formatSpeed(previewRun.averageSpeedKmh),
                     icon: Icons.bolt,
+                  ),
+                  MetricTile(
+                    label: 'Vel. maxima',
+                    value: formatSpeed(previewRun.calculatedMaxSpeedKmh),
+                    icon: Icons.flash_on,
                   ),
                   MetricTile(
                     label: 'Passos',
@@ -264,9 +269,21 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
                     icon: Icons.directions_walk,
                   ),
                   MetricTile(
+                    label: 'Cadencia',
+                    value: formatCadence(previewRun.averageCadenceSpm),
+                    icon: Icons.repeat,
+                  ),
+                  MetricTile(
                     label: 'Calorias',
                     value: '$calories kcal',
                     icon: Icons.local_fire_department,
+                  ),
+                  MetricTile(
+                    label: 'Altimetria',
+                    value: formatElevationGain(
+                      previewRun.calculatedElevationGainMeters,
+                    ),
+                    icon: Icons.terrain,
                   ),
                 ],
               ),

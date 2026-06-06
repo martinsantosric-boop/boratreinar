@@ -26,6 +26,26 @@ String formatPace(int secondsPerKm) {
   return '$minutes:${seconds.toString().padLeft(2, '0')} /km';
 }
 
+String formatSpeed(double speedKmh) {
+  if (speedKmh <= 0) return '--';
+  return '${speedKmh.toStringAsFixed(1)} km/h';
+}
+
+String formatElevationGain(double meters) {
+  if (meters <= 0) return '--';
+  return '${meters.round()} m';
+}
+
+String formatCadence(int stepsPerMinute) {
+  if (stepsPerMinute <= 0) return '--';
+  return '$stepsPerMinute spm';
+}
+
+String formatHeartRate(int? beatsPerMinute) {
+  if (beatsPerMinute == null || beatsPerMinute <= 0) return '--';
+  return '$beatsPerMinute bpm';
+}
+
 String formatDate(DateTime date) {
   return DateFormat('dd/MM/yyyy HH:mm').format(date);
 }

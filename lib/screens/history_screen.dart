@@ -111,6 +111,9 @@ class _ManualRunDialogState extends State<_ManualRunDialog> {
   final _distanceController = TextEditingController();
   final _minutesController = TextEditingController();
   final _stepsController = TextEditingController();
+  final _maxSpeedController = TextEditingController();
+  final _elevationController = TextEditingController();
+  final _heartRateController = TextEditingController();
   final _notesController = TextEditingController();
 
   @override
@@ -118,6 +121,9 @@ class _ManualRunDialogState extends State<_ManualRunDialog> {
     _distanceController.dispose();
     _minutesController.dispose();
     _stepsController.dispose();
+    _maxSpeedController.dispose();
+    _elevationController.dispose();
+    _heartRateController.dispose();
     _notesController.dispose();
     super.dispose();
   }
@@ -130,6 +136,13 @@ class _ManualRunDialogState extends State<_ManualRunDialog> {
     );
     final minutes = int.parse(_minutesController.text);
     final steps = int.tryParse(_stepsController.text) ?? 0;
+    final maxSpeedKmh = double.tryParse(
+      _maxSpeedController.text.replaceAll(',', '.'),
+    );
+    final elevationGainMeters = double.tryParse(
+      _elevationController.text.replaceAll(',', '.'),
+    );
+    final averageHeartRateBpm = int.tryParse(_heartRateController.text);
     final endedAt = DateTime.now();
     final duration = Duration(minutes: minutes);
 
@@ -144,6 +157,9 @@ class _ManualRunDialogState extends State<_ManualRunDialog> {
       bodyWeightKg: widget.profile.bodyWeightKg,
       heightCm: widget.profile.heightCm,
       age: widget.profile.age,
+      maxSpeedKmh: maxSpeedKmh,
+      elevationGainMeters: elevationGainMeters,
+      averageHeartRateBpm: averageHeartRateBpm,
       notes: _notesController.text.trim().isEmpty
           ? null
           : _notesController.text.trim(),
@@ -210,6 +226,61 @@ class _ManualRunDialogState extends State<_ManualRunDialog> {
                   final parsed = int.tryParse(value!);
                   if (parsed == null || parsed < 0) {
                     return 'Informe um total de passos valido.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _maxSpeedController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Velocidade maxima em km/h',
+                  prefixIcon: Icon(Icons.flash_on),
+                ),
+                validator: (value) {
+                  if ((value ?? '').isEmpty) return null;
+                  final parsed = double.tryParse(value!.replaceAll(',', '.'));
+                  if (parsed == null || parsed <= 0) {
+                    return 'Informe uma velocidade valida.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _elevationController,
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
+                decoration: const InputDecoration(
+                  labelText: 'Ganho de elevacao em metros',
+                  prefixIcon: Icon(Icons.terrain),
+                ),
+                validator: (value) {
+                  if ((value ?? '').isEmpty) return null;
+                  final parsed = double.tryParse(value!.replaceAll(',', '.'));
+                  if (parsed == null || parsed < 0) {
+                    return 'Informe uma altimetria valida.';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 12),
+              TextFormField(
+                controller: _heartRateController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(
+                  labelText: 'Frequencia cardiaca media',
+                  prefixIcon: Icon(Icons.favorite),
+                ),
+                validator: (value) {
+                  if ((value ?? '').isEmpty) return null;
+                  final parsed = int.tryParse(value!);
+                  if (parsed == null || parsed < 30 || parsed > 230) {
+                    return 'Informe batimentos entre 30 e 230.';
                   }
                   return null;
                 },
