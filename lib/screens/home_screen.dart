@@ -4,8 +4,10 @@ import '../models/gamification_state.dart';
 import '../models/run_session.dart';
 import '../models/user_profile.dart';
 import '../services/auth_service.dart';
+import '../services/bolt_welcome_service.dart';
 import '../services/gamification_service.dart';
 import '../services/run_storage_service.dart';
+import '../widgets/bolt_welcome_overlay.dart';
 import '../utils/run_formatters.dart';
 import '../widgets/bolt_widget.dart';
 import '../widgets/metric_tile.dart';
@@ -19,7 +21,9 @@ import 'profile_screen.dart';
 import 'ranking_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({super.key, this.welcomeUserId});
+
+  final String? welcomeUserId;
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -27,6 +31,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final _authService = AuthService();
+  final _boltWelcomeService = BoltWelcomeService();
   final _storage = RunStorageService();
   final _gamification = GamificationService();
   var _selectedIndex = 0;
@@ -35,6 +40,7 @@ class _HomeScreenState extends State<HomeScreen> {
   var _profile = const UserProfile();
   var _hasUserProfile = false;
   var _loading = true;
+  var _showWelcomeOverlay = false;
   var _gamificationState = const GamificationState();
 
   @override
@@ -58,6 +64,25 @@ class _HomeScreenState extends State<HomeScreen> {
       _gamificationState = gamificationState;
       _loading = false;
     });
+    await _showWelcomeIfNeeded();
+  }
+
+  Future<void> _showWelcomeIfNeeded() async {
+    final userId = widget.welcomeUserId;
+    final shouldShow = await _boltWelcomeService.shouldShowForUser(userId);
+    if (!mounted || !shouldShow) return;
+
+    setState(() => _showWelcomeOverlay = true);
+  }
+
+  Future<void> _finishWelcome() async {
+    final userId = widget.welcomeUserId;
+    if (userId != null) {
+      await _boltWelcomeService.markSeenForUser(userId);
+    }
+
+    if (!mounted) return;
+    setState(() => _showWelcomeOverlay = false);
   }
 
   Future<void> _startRun() async {
@@ -156,66 +181,71 @@ class _HomeScreenState extends State<HomeScreen> {
       ProfileScreen(profile: _profile, onSaveProfile: _saveProfile),
     ];
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Cooper Maratonista'),
-        actions: [
-          IconButton(
-            tooltip: 'Atualizar',
-            onPressed: _loadData,
-            icon: const Icon(Icons.refresh),
+    return Stack(
+      children: [
+        Scaffold(
+          appBar: AppBar(
+            title: const Text('Cooper Maratonista'),
+            actions: [
+              IconButton(
+                tooltip: 'Atualizar',
+                onPressed: _loadData,
+                icon: const Icon(Icons.refresh),
+              ),
+              IconButton(
+                tooltip: 'Sair',
+                onPressed: _signOut,
+                icon: const Icon(Icons.logout),
+              ),
+            ],
           ),
-          IconButton(
-            tooltip: 'Sair',
-            onPressed: _signOut,
-            icon: const Icon(Icons.logout),
+          body: _loading
+              ? const Center(child: CircularProgressIndicator())
+              : AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  child: pages[_selectedIndex],
+                ),
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _selectedIndex,
+            onDestinationSelected: (index) {
+              setState(() => _selectedIndex = index);
+            },
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.home_outlined),
+                selectedIcon: Icon(Icons.home),
+                label: 'Inicio',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.history_outlined),
+                selectedIcon: Icon(Icons.history),
+                label: 'Historico',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.emoji_events_outlined),
+                selectedIcon: Icon(Icons.emoji_events),
+                label: 'Conquistas',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.leaderboard_outlined),
+                selectedIcon: Icon(Icons.leaderboard),
+                label: 'Ranking',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.flag_outlined),
+                selectedIcon: Icon(Icons.flag),
+                label: 'Metas',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.person_outline),
+                selectedIcon: Icon(Icons.person),
+                label: 'Perfil',
+              ),
+            ],
           ),
-        ],
-      ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator())
-          : AnimatedSwitcher(
-              duration: const Duration(milliseconds: 220),
-              child: pages[_selectedIndex],
-            ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() => _selectedIndex = index);
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Inicio',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.history_outlined),
-            selectedIcon: Icon(Icons.history),
-            label: 'Historico',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.emoji_events_outlined),
-            selectedIcon: Icon(Icons.emoji_events),
-            label: 'Conquistas',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.leaderboard_outlined),
-            selectedIcon: Icon(Icons.leaderboard),
-            label: 'Ranking',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.flag_outlined),
-            selectedIcon: Icon(Icons.flag),
-            label: 'Metas',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
-            label: 'Perfil',
-          ),
-        ],
-      ),
+        ),
+        if (_showWelcomeOverlay) BoltWelcomeOverlay(onFinished: _finishWelcome),
+      ],
     );
   }
 }

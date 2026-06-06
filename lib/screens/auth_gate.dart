@@ -69,6 +69,8 @@ class _AuthGateState extends State<AuthGate> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    return _session == null ? const AuthScreen() : const HomeScreen();
+    return _session == null
+        ? const AuthScreen()
+        : HomeScreen(welcomeUserId: _session!.user.id);
   }
 }
