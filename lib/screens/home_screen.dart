@@ -52,8 +52,19 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadData() async {
     final runs = await _storage.loadRuns();
     final weeklyGoalKm = await _storage.loadWeeklyGoalKm();
-    final profile = await _storage.loadUserProfile();
-    final hasUserProfile = await _storage.hasUserProfile();
+    final localProfile = await _storage.loadUserProfile();
+    final remoteProfile = await _loadRemoteProfile();
+    final profile = remoteProfile == null
+        ? localProfile
+        : _mergeProfiles(
+            localProfile: localProfile,
+            remoteProfile: remoteProfile,
+          );
+    if (remoteProfile?.hasAnyData == true) {
+      await _storage.saveUserProfile(profile);
+    }
+    final hasUserProfile =
+        profile.hasAnyData || await _storage.hasUserProfile();
     final gamificationState = await _gamification.loadState();
     if (!mounted) return;
     setState(() {
@@ -65,6 +76,38 @@ class _HomeScreenState extends State<HomeScreen> {
       _loading = false;
     });
     await _showWelcomeIfNeeded();
+  }
+
+  UserProfile _mergeProfiles({
+    required UserProfile localProfile,
+    required UserProfile remoteProfile,
+  }) {
+    return UserProfile(
+      displayName: remoteProfile.displayName.trim().isNotEmpty
+          ? remoteProfile.displayName
+          : localProfile.displayName,
+      gender: remoteProfile.gender.trim().isNotEmpty
+          ? remoteProfile.gender
+          : localProfile.gender,
+      bodyWeightKg: remoteProfile.bodyWeightKg > 0
+          ? remoteProfile.bodyWeightKg
+          : localProfile.bodyWeightKg,
+      heightCm: remoteProfile.heightCm > 0
+          ? remoteProfile.heightCm
+          : localProfile.heightCm,
+      age: remoteProfile.age > 0 ? remoteProfile.age : localProfile.age,
+    );
+  }
+
+  Future<UserProfile?> _loadRemoteProfile() async {
+    if (widget.welcomeUserId == null) return null;
+
+    try {
+      return await _authService.loadCurrentUserProfile();
+    } catch (error) {
+      debugPrint('Erro ao carregar perfil remoto: $error');
+      return null;
+    }
   }
 
   Future<void> _showWelcomeIfNeeded() async {

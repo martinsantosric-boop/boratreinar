@@ -29,6 +29,10 @@ alter table public.user_gamification enable row level security;
 
 grant select, insert, update on public.user_gamification to authenticated;
 
+-- Garantir coluna de sexo usada pelo perfil do app
+alter table public.profiles
+add column if not exists gender text;
+
 -- 3. Criar políticas de acesso
 -- ============================================
 

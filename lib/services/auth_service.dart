@@ -71,7 +71,7 @@ class AuthService {
     if (user == null) return;
 
     final metadata = user.userMetadata ?? const <String, dynamic>{};
-    await _client.from('profiles').upsert({
+    await _upsertProfile({
       'id': user.id,
       'email': user.email,
       'full_name': metadata['full_name'] ?? metadata['name'],
@@ -81,11 +81,25 @@ class AuthService {
     });
   }
 
+  Future<UserProfile?> loadCurrentUserProfile() async {
+    final user = _client.auth.currentUser;
+    if (user == null) return null;
+
+    final data = await _client
+        .from('profiles')
+        .select()
+        .eq('id', user.id)
+        .maybeSingle();
+
+    if (data == null) return null;
+    return UserProfile.fromSupabase(data);
+  }
+
   Future<void> updateProfileMetrics(UserProfile profile) async {
     final user = _client.auth.currentUser;
     if (user == null) return;
 
-    await _client.from('profiles').upsert({
+    await _upsertProfile({
       'id': user.id,
       'email': user.email,
       'full_name': profile.displayName.trim().isEmpty
@@ -97,5 +111,20 @@ class AuthService {
       'age': profile.age,
       'updated_at': DateTime.now().toIso8601String(),
     });
+  }
+
+  Future<void> _upsertProfile(Map<String, dynamic> payload) async {
+    try {
+      await _client.from('profiles').upsert(payload);
+    } on PostgrestException catch (error) {
+      final canRetryWithoutGender =
+          payload.containsKey('gender') &&
+          error.message.toLowerCase().contains('gender');
+      if (!canRetryWithoutGender) rethrow;
+
+      final fallbackPayload = Map<String, dynamic>.from(payload)
+        ..remove('gender');
+      await _client.from('profiles').upsert(fallbackPayload);
+    }
   }
 }

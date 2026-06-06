@@ -48,12 +48,30 @@ class UserProfile {
     };
   }
 
+  bool get hasAnyData {
+    return displayName.trim().isNotEmpty ||
+        gender.trim().isNotEmpty ||
+        bodyWeightKg > 0 ||
+        heightCm > 0 ||
+        age > 0;
+  }
+
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       displayName: (json['displayName'] as String?)?.trim() ?? '',
       gender: (json['gender'] as String?)?.trim() ?? '',
       bodyWeightKg: ((json['bodyWeightKg'] as num?) ?? 0).toDouble(),
       heightCm: ((json['heightCm'] as num?) ?? 0).toDouble(),
+      age: ((json['age'] as num?) ?? 0).toInt(),
+    );
+  }
+
+  factory UserProfile.fromSupabase(Map<String, dynamic> json) {
+    return UserProfile(
+      displayName: (json['full_name'] as String?)?.trim() ?? '',
+      gender: (json['gender'] as String?)?.trim() ?? '',
+      bodyWeightKg: ((json['body_weight_kg'] as num?) ?? 0).toDouble(),
+      heightCm: ((json['height_cm'] as num?) ?? 0).toDouble(),
       age: ((json['age'] as num?) ?? 0).toInt(),
     );
   }
