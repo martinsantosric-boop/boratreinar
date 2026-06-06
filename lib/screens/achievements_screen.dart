@@ -26,7 +26,7 @@ class AchievementsScreen extends StatelessWidget {
     );
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       children: [
         Card(
           color: Theme.of(context).colorScheme.primary,
@@ -221,31 +221,33 @@ class AchievementsScreen extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         title: Text(achievement.title),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: Text(
-                achievement.icon,
-                style: const TextStyle(fontSize: 42),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text(
+                  achievement.icon,
+                  style: const TextStyle(fontSize: 42),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(achievement.description),
-            const SizedBox(height: 12),
-            Text('Recompensa: +${achievement.xpReward} XP'),
-            const SizedBox(height: 12),
-            LinearProgressIndicator(value: progress.value),
-            const SizedBox(height: 6),
-            Text(progress.label),
-            if (achievement.unlockedAt != null) ...[
               const SizedBox(height: 12),
-              Text(
-                'Desbloqueada em ${DateFormat('dd/MM/yyyy').format(achievement.unlockedAt!)}',
-              ),
+              Text(achievement.description),
+              const SizedBox(height: 12),
+              Text('Recompensa: +${achievement.xpReward} XP'),
+              const SizedBox(height: 12),
+              LinearProgressIndicator(value: progress.value),
+              const SizedBox(height: 6),
+              Text(progress.label),
+              if (achievement.unlockedAt != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  'Desbloqueada em ${DateFormat('dd/MM/yyyy').format(achievement.unlockedAt!)}',
+                ),
+              ],
             ],
-          ],
+          ),
         ),
         actions: [
           TextButton(

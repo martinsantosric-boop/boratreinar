@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/gamification_state.dart';
+import '../models/league.dart';
 import '../models/run_session.dart';
 import '../models/user_profile.dart';
 import '../services/auth_service.dart';
@@ -338,63 +339,13 @@ class _DashboardTab extends StatelessWidget {
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 760),
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
           children: [
-            // Card principal com Bolt
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    BoltWidget(
-                      expression: gamificationState.currentStreak >= 7
-                          ? BoltExpression.fire
-                          : BoltExpression.ready,
-                      league: league,
-                      size: 120,
-                      showLeagueBadge: true,
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            _getBoltGreeting(),
-                            style: Theme.of(context).textTheme.titleLarge
-                                ?.copyWith(fontWeight: FontWeight.w900),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '${league.emoji} Liga ${league.displayName}',
-                            style: Theme.of(context).textTheme.bodyLarge
-                                ?.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          Align(
-                            alignment: Alignment.centerLeft,
-                            child: ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 220),
-                              child: FilledButton.icon(
-                                onPressed: onStartRun,
-                                icon: const Icon(Icons.play_arrow, size: 20),
-                                label: const Text('Bora treinar!'),
-                                style: FilledButton.styleFrom(
-                                  minimumSize: const Size.fromHeight(44),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 18,
-                                    vertical: 12,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            _DashboardHeroCard(
+              greeting: _getBoltGreeting(),
+              league: league,
+              isOnFire: gamificationState.currentStreak >= 7,
+              onStartRun: onStartRun,
             ),
             const SizedBox(height: 16),
 
@@ -712,6 +663,128 @@ class _DashboardTab extends StatelessWidget {
       lastRunDate.day,
     );
     return lastRunDay.isBefore(todayStart);
+  }
+}
+
+class _DashboardHeroCard extends StatelessWidget {
+  const _DashboardHeroCard({
+    required this.greeting,
+    required this.league,
+    required this.isOnFire,
+    required this.onStartRun,
+  });
+
+  final String greeting;
+  final League league;
+  final bool isOnFire;
+  final VoidCallback onStartRun;
+
+  @override
+  Widget build(BuildContext context) {
+    final expression = isOnFire ? BoltExpression.fire : BoltExpression.ready;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxWidth < 360;
+            final bolt = BoltWidget(
+              expression: expression,
+              league: league,
+              size: compact ? 96 : 120,
+              showLeagueBadge: true,
+            );
+            final copy = _DashboardHeroCopy(
+              greeting: greeting,
+              league: league,
+              compact: compact,
+              onStartRun: onStartRun,
+            );
+
+            if (compact) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Center(child: bolt),
+                  const SizedBox(height: 12),
+                  copy,
+                ],
+              );
+            }
+
+            return Row(
+              children: [
+                bolt,
+                const SizedBox(width: 16),
+                Expanded(child: copy),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+}
+
+class _DashboardHeroCopy extends StatelessWidget {
+  const _DashboardHeroCopy({
+    required this.greeting,
+    required this.league,
+    required this.compact,
+    required this.onStartRun,
+  });
+
+  final String greeting;
+  final League league;
+  final bool compact;
+  final VoidCallback onStartRun;
+
+  @override
+  Widget build(BuildContext context) {
+    final button = FilledButton.icon(
+      onPressed: onStartRun,
+      icon: const Icon(Icons.play_arrow, size: 20),
+      label: const Text('Bora treinar!'),
+      style: FilledButton.styleFrom(
+        minimumSize: Size.fromHeight(compact ? 48 : 44),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: compact
+          ? CrossAxisAlignment.stretch
+          : CrossAxisAlignment.start,
+      children: [
+        Text(
+          greeting,
+          textAlign: compact ? TextAlign.center : TextAlign.start,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '${league.emoji} Liga ${league.displayName}',
+          textAlign: compact ? TextAlign.center : TextAlign.start,
+          style: Theme.of(
+            context,
+          ).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 10),
+        if (compact)
+          button
+        else
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 220),
+              child: button,
+            ),
+          ),
+      ],
+    );
   }
 }
 

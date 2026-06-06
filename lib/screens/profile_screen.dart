@@ -107,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
       children: [
         Card(
           color: Theme.of(context).colorScheme.primary,

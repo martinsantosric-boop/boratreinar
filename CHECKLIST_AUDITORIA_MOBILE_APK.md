@@ -50,7 +50,7 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 
 - [x] Reduzir barra inferior para no maximo cinco destinos.
 - [x] Mover Metas para dentro de Inicio ou Perfil.
-- [ ] Revisar textos e icones em telas pequenas.
+- [x] Revisar textos e icones em telas pequenas.
 
 ### Ranking
 
@@ -113,9 +113,9 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 
 - [x] Safe area aplicada na tela de corrida ativa.
 - [x] Botoes principais da corrida com area de toque maior.
-- [ ] Revisar padding inferior em todas as telas.
-- [ ] Revisar legibilidade em telas pequenas.
-- [ ] Revisar scroll das telas longas.
+- [x] Revisar padding inferior em todas as telas.
+- [x] Revisar legibilidade em telas pequenas.
+- [x] Revisar scroll das telas longas.
 - [ ] Avaliar performance do video inicial no APK.
 - [ ] Avaliar tempo de carregamento inicial.
 - [ ] Testar comportamento sem internet.

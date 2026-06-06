@@ -21,7 +21,7 @@ class LeaderboardService {
           .toList();
     } catch (e) {
       debugPrint('Erro ao carregar leaderboard: $e');
-      return [];
+      rethrow;
     }
   }
 }
