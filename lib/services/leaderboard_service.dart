@@ -6,6 +6,8 @@ import '../models/leaderboard_user.dart';
 class LeaderboardService {
   SupabaseClient get _client => Supabase.instance.client;
 
+  String? get currentUserId => _client.auth.currentUser?.id;
+
   Future<List<LeaderboardUser>> loadLeaderboard({int limit = 100}) async {
     try {
       final data = await _client

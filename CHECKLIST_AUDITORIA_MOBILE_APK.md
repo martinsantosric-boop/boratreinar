@@ -54,11 +54,11 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 
 ### Ranking
 
-- [ ] Transformar filtros de liga em chips rolaveis horizontalmente.
-- [ ] Garantir padding inferior para nao esconder conteudo.
-- [ ] Destacar melhor o usuario logado.
-- [ ] Mostrar XP faltante para ultrapassar o proximo colocado.
-- [ ] Conferir consistencia entre XP, ranking e posicoes.
+- [x] Transformar filtros de liga em chips rolaveis horizontalmente.
+- [x] Garantir padding inferior para nao esconder conteudo.
+- [x] Destacar melhor o usuario logado.
+- [x] Mostrar XP faltante para ultrapassar o proximo colocado.
+- [x] Conferir consistencia entre XP, ranking e posicoes.
 
 ### Gamificacao estilo Duolingo
 
