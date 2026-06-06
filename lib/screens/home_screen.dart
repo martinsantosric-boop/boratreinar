@@ -139,6 +139,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Processa gamificação
     final result = await _gamification.processRun(run, [run, ..._runs]);
+    final rewardedRun = run.copyWith(
+      xpGained: result.totalXpGained,
+      completedMissionTitles: result.completedMissions
+          .map((mission) => mission.title)
+          .toList(),
+      unlockedAchievementTitles: result.newlyUnlockedAchievements
+          .map((achievement) => achievement.title)
+          .toList(),
+    );
+    await _storage.saveRun(rewardedRun);
 
     await _loadData();
 
@@ -150,14 +160,14 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         result,
         _gamificationState.currentLeague,
-        run,
+        rewardedRun,
       );
     } else {
       await RewardsDialog.show(
         context,
         result,
         _gamificationState.currentLeague,
-        run,
+        rewardedRun,
       );
     }
   }

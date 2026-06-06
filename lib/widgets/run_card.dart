@@ -98,7 +98,95 @@ class RunCard extends StatelessWidget {
               const SizedBox(height: 12),
               Text(run.notes!),
             ],
+            if (run.xpGained > 0 ||
+                run.completedMissionTitles.isNotEmpty ||
+                run.unlockedAchievementTitles.isNotEmpty ||
+                run.locationDebugLogs.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  if (run.xpGained > 0)
+                    _SmallBadge(text: '+${run.xpGained} XP'),
+                  if (run.completedMissionTitles.isNotEmpty)
+                    _SmallBadge(
+                      text: '${run.completedMissionTitles.length} missoes',
+                    ),
+                  if (run.unlockedAchievementTitles.isNotEmpty)
+                    _SmallBadge(
+                      text:
+                          '${run.unlockedAchievementTitles.length} conquistas',
+                    ),
+                  if (run.locationDebugLogs.isNotEmpty)
+                    OutlinedButton.icon(
+                      onPressed: () => _showGpsDebug(context),
+                      icon: const Icon(Icons.bug_report_outlined, size: 18),
+                      label: const Text('Debug GPS'),
+                    ),
+                ],
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showGpsDebug(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Debug GPS'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.separated(
+            shrinkWrap: true,
+            itemCount: run.locationDebugLogs.length,
+            separatorBuilder: (_, __) => const Divider(height: 16),
+            itemBuilder: (context, index) {
+              final log = run.locationDebugLogs[index];
+              return Text(
+                '${log.accepted ? 'Aceito' : 'Ignorado'} | '
+                '${log.accuracy.toStringAsFixed(0)} m | '
+                '+${log.deltaMeters.toStringAsFixed(1)} m | '
+                'total ${log.accumulatedDistanceMeters.toStringAsFixed(1)} m\n'
+                '${log.latitude.toStringAsFixed(6)}, ${log.longitude.toStringAsFixed(6)}',
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Fechar'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SmallBadge extends StatelessWidget {
+  const _SmallBadge({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      decoration: BoxDecoration(
+        color: Colors.amber.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.amber.shade200),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: Colors.amber.shade900,
+          fontSize: 12,
+          fontWeight: FontWeight.w800,
         ),
       ),
     );

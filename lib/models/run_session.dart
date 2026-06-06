@@ -18,6 +18,9 @@ class RunSession {
     this.elevationGainMeters,
     this.averageHeartRateBpm,
     this.locationDebugLogs = const [],
+    this.xpGained = 0,
+    this.completedMissionTitles = const [],
+    this.unlockedAchievementTitles = const [],
   });
 
   final String id;
@@ -35,6 +38,9 @@ class RunSession {
   final double? elevationGainMeters;
   final int? averageHeartRateBpm;
   final List<LocationDebugLog> locationDebugLogs;
+  final int xpGained;
+  final List<String> completedMissionTitles;
+  final List<String> unlockedAchievementTitles;
 
   double get distanceKm => distanceMeters / 1000;
 
@@ -116,6 +122,35 @@ class RunSession {
 
   bool get isManualEntry => !isGpsTracked;
 
+  RunSession copyWith({
+    int? xpGained,
+    List<String>? completedMissionTitles,
+    List<String>? unlockedAchievementTitles,
+  }) {
+    return RunSession(
+      id: id,
+      startedAt: startedAt,
+      endedAt: endedAt,
+      duration: duration,
+      distanceMeters: distanceMeters,
+      route: route,
+      steps: steps,
+      notes: notes,
+      bodyWeightKg: bodyWeightKg,
+      heightCm: heightCm,
+      age: age,
+      maxSpeedKmh: maxSpeedKmh,
+      elevationGainMeters: elevationGainMeters,
+      averageHeartRateBpm: averageHeartRateBpm,
+      locationDebugLogs: locationDebugLogs,
+      xpGained: xpGained ?? this.xpGained,
+      completedMissionTitles:
+          completedMissionTitles ?? this.completedMissionTitles,
+      unlockedAchievementTitles:
+          unlockedAchievementTitles ?? this.unlockedAchievementTitles,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -135,6 +170,9 @@ class RunSession {
       'locationDebugLogs': locationDebugLogs
           .map((log) => log.toJson())
           .toList(),
+      'xpGained': xpGained,
+      'completedMissionTitles': completedMissionTitles,
+      'unlockedAchievementTitles': unlockedAchievementTitles,
     };
   }
 
@@ -161,6 +199,15 @@ class RunSession {
               .map(
                 (log) => LocationDebugLog.fromJson(log as Map<String, dynamic>),
               )
+              .toList(),
+      xpGained: ((json['xpGained'] as num?) ?? 0).toInt(),
+      completedMissionTitles:
+          ((json['completedMissionTitles'] as List<dynamic>?) ?? const [])
+              .map((title) => title.toString())
+              .toList(),
+      unlockedAchievementTitles:
+          ((json['unlockedAchievementTitles'] as List<dynamic>?) ?? const [])
+              .map((title) => title.toString())
               .toList(),
     );
   }

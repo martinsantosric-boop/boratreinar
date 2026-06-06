@@ -366,8 +366,8 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
                       icon: Icons.flash_on,
                     ),
                     MetricTile(
-                      label: 'Passos',
-                      value: '$_steps',
+                      label: _steps > 0 ? 'Passos' : 'Passos est.',
+                      value: '${previewRun.estimatedSteps}',
                       icon: Icons.directions_walk,
                     ),
                     MetricTile(
@@ -376,12 +376,12 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
                       icon: Icons.repeat,
                     ),
                     MetricTile(
-                      label: 'Calorias',
+                      label: 'Calorias est.',
                       value: '$calories kcal',
                       icon: Icons.local_fire_department,
                     ),
                     MetricTile(
-                      label: 'Altimetria',
+                      label: 'Altim. est.',
                       value: formatElevationGain(
                         previewRun.calculatedElevationGainMeters,
                       ),

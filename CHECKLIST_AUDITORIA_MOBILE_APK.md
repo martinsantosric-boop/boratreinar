@@ -35,8 +35,8 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 - [x] Registrar timestamp em cada ponto de localizacao.
 - [x] Persistir logs de debug por treino.
 - [x] Logs incluem latitude, longitude, timestamp, precisao, velocidade instantanea, distancia incremental, distancia acumulada e aceite/rejeicao.
-- [ ] Mostrar na UI quais metricas sao estimadas.
-- [ ] Criar tela/exportacao simples para visualizar logs de debug de um treino.
+- [x] Mostrar na UI quais metricas sao estimadas.
+- [x] Criar tela/exportacao simples para visualizar logs de debug de um treino.
 - [ ] Comparar corrida de 1 km com app confiavel.
 - [ ] Testar com tela bloqueada.
 - [ ] Testar caminhada curta.
@@ -105,8 +105,8 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 
 - [x] Melhorar estado vazio com orientacao sobre GPS e registro manual.
 - [x] Diferenciar corrida com GPS de registro manual.
-- [ ] Mostrar XP ganho em cada treino.
-- [ ] Mostrar missoes concluidas em cada treino.
+- [x] Mostrar XP ganho em cada treino.
+- [x] Mostrar missoes concluidas em cada treino.
 - [x] Indicar se o treino foi GPS ou manual.
 
 ## Ajustes Gerais Mobile/APK
