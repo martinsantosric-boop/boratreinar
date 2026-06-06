@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../models/geo_sample.dart';
+import '../models/location_debug_log.dart';
 import '../models/run_session.dart';
 import '../models/user_profile.dart';
 import '../services/location_tracker.dart';
@@ -14,6 +15,8 @@ import '../utils/run_formatters.dart';
 import '../widgets/metric_tile.dart';
 
 enum RunStatus { ready, running, paused }
+
+enum GpsStatus { checking, ready, permissionNeeded, serviceDisabled, error }
 
 class ActiveRunScreen extends StatefulWidget {
   const ActiveRunScreen({super.key, required this.profile});
@@ -30,6 +33,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   final _stepCounter = StepCounterService();
   final AudioPlayer? _apitoPlayer = kIsWeb ? null : AudioPlayer();
   final _route = <GeoSample>[];
+  final _locationDebugLogs = <LocationDebugLog>[];
   StreamSubscription<LocationUpdate>? _locationSubscription;
   StreamSubscription<int>? _stepSubscription;
   Timer? _timer;
@@ -39,12 +43,15 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   int _steps = 0;
   int _stepsBeforeCurrentSegment = 0;
   RunStatus _status = RunStatus.ready;
+  GpsStatus _gpsStatus = GpsStatus.checking;
   String? _message;
+  String _gpsMessage = 'Buscando GPS...';
   var _mostrarMascote = false;
 
   @override
   void initState() {
     super.initState();
+    _prepareGps();
   }
 
   @override
@@ -56,6 +63,41 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
     _stepCounter.stop();
     _apitoPlayer?.dispose();
     super.dispose();
+  }
+
+  Future<void> _prepareGps() async {
+    setState(() {
+      _gpsStatus = GpsStatus.checking;
+      _gpsMessage = 'Buscando GPS...';
+      _message = 'Vou esperar o GPS ficar pronto antes da corrida.';
+    });
+
+    try {
+      await _tracker.ensureReady();
+      await _tracker.currentSample();
+      if (!mounted) return;
+      setState(() {
+        _gpsStatus = GpsStatus.ready;
+        _gpsMessage = 'GPS pronto';
+        _message = 'GPS pronto. Toque em Iniciar corrida.';
+      });
+    } on LocationTrackerException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _gpsStatus = error.message.toLowerCase().contains('gps')
+            ? GpsStatus.serviceDisabled
+            : GpsStatus.permissionNeeded;
+        _gpsMessage = error.message;
+        _message = error.message;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _gpsStatus = GpsStatus.error;
+        _gpsMessage = 'Nao foi possivel preparar o GPS.';
+        _message = 'Falha ao preparar GPS: $error';
+      });
+    }
   }
 
   Future<void> _startWithMascote() async {
@@ -83,6 +125,11 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   }
 
   Future<void> _start() async {
+    if (_gpsStatus != GpsStatus.ready) {
+      await _prepareGps();
+      if (!mounted || _gpsStatus != GpsStatus.ready) return;
+    }
+
     try {
       await _tracker.ensureReady();
       await _stepCounter.ensureReady();
@@ -91,7 +138,9 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
       _stepsBeforeCurrentSegment = _steps;
       _startedAt ??= DateTime.now();
       final sample = await _tracker.currentSample();
-      if (sample != null) _route.add(sample);
+      if (sample != null) {
+        _route.add(sample.copyWith(speedMetersPerSecond: null));
+      }
 
       _timer ??= Timer.periodic(const Duration(seconds: 1), (_) {
         if (_status == RunStatus.running) {
@@ -104,11 +153,41 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
       _locationSubscription = _tracker.start().listen(
         (update) {
           setState(() {
+            final nextDistance = _distanceMeters + update.deltaMeters;
             if (update.isAccepted) {
               _route.add(update.sample);
             }
-            _distanceMeters += update.deltaMeters;
+            _locationDebugLogs.add(
+              LocationDebugLog(
+                latitude: update.sample.latitude,
+                longitude: update.sample.longitude,
+                recordedAt: update.sample.recordedAt,
+                accuracy: update.sample.accuracy,
+                instantSpeedMetersPerSecond: update.instantSpeedMetersPerSecond,
+                deltaMeters: update.deltaMeters,
+                accumulatedDistanceMeters: nextDistance,
+                accepted: update.isAccepted,
+                message: update.statusMessage,
+              ),
+            );
+            if (kDebugMode) {
+              debugPrint(
+                'GPS debug | lat=${update.sample.latitude}, '
+                'lng=${update.sample.longitude}, '
+                'time=${update.sample.recordedAt.toIso8601String()}, '
+                'accuracy=${update.sample.accuracy.toStringAsFixed(1)}m, '
+                'speed=${update.instantSpeedMetersPerSecond.toStringAsFixed(2)}m/s, '
+                'delta=${update.deltaMeters.toStringAsFixed(1)}m, '
+                'total=${nextDistance.toStringAsFixed(1)}m, '
+                'accepted=${update.isAccepted}',
+              );
+            }
+            _distanceMeters = nextDistance;
             _message = update.statusMessage;
+            if (update.isAccepted) {
+              _gpsStatus = GpsStatus.ready;
+              _gpsMessage = 'GPS ativo';
+            }
           });
         },
         onError: (error) {
@@ -127,9 +206,17 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
       setState(() {
         _status = RunStatus.running;
         _message = 'Corrida em andamento.';
+        _gpsStatus = GpsStatus.ready;
+        _gpsMessage = 'GPS ativo';
       });
     } on LocationTrackerException catch (error) {
-      setState(() => _message = error.message);
+      setState(() {
+        _gpsStatus = error.message.toLowerCase().contains('gps')
+            ? GpsStatus.serviceDisabled
+            : GpsStatus.permissionNeeded;
+        _gpsMessage = error.message;
+        _message = error.message;
+      });
     } on StepCounterException catch (error) {
       setState(() => _message = error.message);
     }
@@ -168,6 +255,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
       bodyWeightKg: widget.profile.bodyWeightKg,
       heightCm: widget.profile.heightCm,
       age: widget.profile.age,
+      locationDebugLogs: List.unmodifiable(_locationDebugLogs),
     );
 
     await _storage.saveRun(run);
@@ -196,153 +284,309 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Corrida ativa')),
-      body: Stack(
-        children: [
-          ListView(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            children: [
-              Card(
-                color: Theme.of(context).colorScheme.primary,
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            ListView(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              children: [
+                _RunActionPanel(
+                  status: _status,
+                  gpsStatus: _gpsStatus,
+                  gpsMessage: _gpsMessage,
+                  onStart: _gpsStatus == GpsStatus.ready
+                      ? _startWithMascote
+                      : null,
+                  onPause: _pause,
+                  onResume: _start,
+                  onFinish: _finish,
+                  onRetryGps: _prepareGps,
+                ),
+                const SizedBox(height: 16),
+                Card(
+                  color: Theme.of(context).colorScheme.primary,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          formatDuration(_elapsed),
+                          style: Theme.of(context).textTheme.displayMedium
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w900,
+                              ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          _status == RunStatus.running
+                              ? 'Mantenha o ritmo'
+                              : _status == RunStatus.paused
+                              ? 'Pausado'
+                              : 'Aguardando inicio',
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.88),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GridView.count(
+                  crossAxisCount: 2,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  childAspectRatio: 1.18,
+                  children: [
+                    MetricTile(
+                      label: 'Distancia',
+                      value: formatDistance(_distanceMeters),
+                      icon: Icons.route,
+                    ),
+                    MetricTile(
+                      label: 'Pace medio',
+                      value: formatPace(pace),
+                      icon: Icons.speed,
+                    ),
+                    MetricTile(
+                      label: 'Velocidade',
+                      value: !hasReliableDistance || _elapsed.inSeconds == 0
+                          ? '--'
+                          : formatSpeed(previewRun.averageSpeedKmh),
+                      icon: Icons.bolt,
+                    ),
+                    MetricTile(
+                      label: 'Vel. maxima',
+                      value: formatSpeed(previewRun.calculatedMaxSpeedKmh),
+                      icon: Icons.flash_on,
+                    ),
+                    MetricTile(
+                      label: 'Passos',
+                      value: '$_steps',
+                      icon: Icons.directions_walk,
+                    ),
+                    MetricTile(
+                      label: 'Cadencia',
+                      value: formatCadence(previewRun.averageCadenceSpm),
+                      icon: Icons.repeat,
+                    ),
+                    MetricTile(
+                      label: 'Calorias',
+                      value: '$calories kcal',
+                      icon: Icons.local_fire_department,
+                    ),
+                    MetricTile(
+                      label: 'Altimetria',
+                      value: formatElevationGain(
+                        previewRun.calculatedElevationGainMeters,
+                      ),
+                      icon: Icons.terrain,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (_message != null)
+                  Card(
+                    child: ListTile(
+                      leading: const Icon(Icons.gps_fixed),
+                      title: Text(_message!),
+                      subtitle: Text(
+                        '${_route.length} pontos aceitos | '
+                        '${_locationDebugLogs.length} leituras | $_steps passos',
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            if (_mostrarMascote)
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Center(
+                    child: SizedBox(
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: MediaQuery.of(context).size.width * 0.9,
+                      child: Image.asset(
+                        'assets/bolt/abertura_mascote.gif',
+                        fit: BoxFit.contain,
+                        filterQuality: FilterQuality.high,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RunActionPanel extends StatelessWidget {
+  const _RunActionPanel({
+    required this.status,
+    required this.gpsStatus,
+    required this.gpsMessage,
+    required this.onStart,
+    required this.onPause,
+    required this.onResume,
+    required this.onFinish,
+    required this.onRetryGps,
+  });
+
+  final RunStatus status;
+  final GpsStatus gpsStatus;
+  final String gpsMessage;
+  final VoidCallback? onStart;
+  final VoidCallback onPause;
+  final VoidCallback onResume;
+  final VoidCallback onFinish;
+  final VoidCallback onRetryGps;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gpsColor = _gpsColor(theme);
+
+    return Card(
+      color: _panelColor(theme),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: gpsColor.withValues(alpha: 0.14),
+                  foregroundColor: gpsColor,
+                  child: Icon(_gpsIcon()),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        formatDuration(_elapsed),
-                        style: Theme.of(context).textTheme.displayMedium
-                            ?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                            ),
+                        _title,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w900,
+                        ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
-                        _status == RunStatus.running
-                            ? 'Mantenha o ritmo'
-                            : _status == RunStatus.paused
-                            ? 'Pausado'
-                            : 'Aguardando inicio',
-                        style: Theme.of(context).textTheme.titleMedium
-                            ?.copyWith(
-                              color: Colors.white.withValues(alpha: 0.88),
-                            ),
+                        gpsMessage,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.black.withValues(alpha: 0.72),
+                        ),
                       ),
                     ],
                   ),
                 ),
+              ],
+            ),
+            const SizedBox(height: 14),
+            if (status == RunStatus.ready) ...[
+              Text(
+                'O Bolt vai esperar o GPS ficar pronto. Quando aparecer verde, toque em Iniciar corrida.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Colors.black.withValues(alpha: 0.64),
+                ),
               ),
-              const SizedBox(height: 16),
-              GridView.count(
-                crossAxisCount: 2,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                childAspectRatio: 1.18,
-                children: [
-                  MetricTile(
-                    label: 'Distancia',
-                    value: formatDistance(_distanceMeters),
-                    icon: Icons.route,
-                  ),
-                  MetricTile(
-                    label: 'Pace medio',
-                    value: formatPace(pace),
-                    icon: Icons.speed,
-                  ),
-                  MetricTile(
-                    label: 'Velocidade',
-                    value: !hasReliableDistance || _elapsed.inSeconds == 0
-                        ? '--'
-                        : formatSpeed(previewRun.averageSpeedKmh),
-                    icon: Icons.bolt,
-                  ),
-                  MetricTile(
-                    label: 'Vel. maxima',
-                    value: formatSpeed(previewRun.calculatedMaxSpeedKmh),
-                    icon: Icons.flash_on,
-                  ),
-                  MetricTile(
-                    label: 'Passos',
-                    value: '$_steps',
-                    icon: Icons.directions_walk,
-                  ),
-                  MetricTile(
-                    label: 'Cadencia',
-                    value: formatCadence(previewRun.averageCadenceSpm),
-                    icon: Icons.repeat,
-                  ),
-                  MetricTile(
-                    label: 'Calorias',
-                    value: '$calories kcal',
-                    icon: Icons.local_fire_department,
-                  ),
-                  MetricTile(
-                    label: 'Altimetria',
-                    value: formatElevationGain(
-                      previewRun.calculatedElevationGainMeters,
-                    ),
-                    icon: Icons.terrain,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              if (_message != null)
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.gps_fixed),
-                    title: Text(_message!),
-                    subtitle: Text(
-                      '${_route.length} pontos GPS | $_steps passos',
-                    ),
+              const SizedBox(height: 14),
+              FilledButton.icon(
+                onPressed: onStart,
+                icon: const Icon(Icons.play_arrow, size: 26),
+                label: const Text('Iniciar corrida'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(56),
+                  textStyle: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
-              const SizedBox(height: 20),
-              if (_status == RunStatus.ready)
-                FilledButton.icon(
-                  onPressed: _startWithMascote,
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Iniciar'),
-                )
-              else if (_status == RunStatus.running)
-                FilledButton.icon(
-                  onPressed: _pause,
-                  icon: const Icon(Icons.pause),
-                  label: const Text('Pausar'),
-                )
-              else
-                FilledButton.icon(
-                  onPressed: _start,
-                  icon: const Icon(Icons.play_arrow),
-                  label: const Text('Continuar'),
+              ),
+              if (gpsStatus != GpsStatus.ready) ...[
+                const SizedBox(height: 10),
+                OutlinedButton.icon(
+                  onPressed: onRetryGps,
+                  icon: const Icon(Icons.gps_fixed),
+                  label: const Text('Verificar GPS novamente'),
                 ),
-              const SizedBox(height: 12),
+              ],
+            ] else if (status == RunStatus.running) ...[
+              FilledButton.icon(
+                onPressed: onPause,
+                icon: const Icon(Icons.pause),
+                label: const Text('Pausar'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
+              ),
+              const SizedBox(height: 10),
               OutlinedButton.icon(
-                onPressed: _finish,
+                onPressed: onFinish,
+                icon: const Icon(Icons.stop),
+                label: const Text('Finalizar e salvar'),
+              ),
+            ] else ...[
+              FilledButton.icon(
+                onPressed: onResume,
+                icon: const Icon(Icons.play_arrow),
+                label: const Text('Retomar corrida'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(52),
+                ),
+              ),
+              const SizedBox(height: 10),
+              OutlinedButton.icon(
+                onPressed: onFinish,
                 icon: const Icon(Icons.stop),
                 label: const Text('Finalizar e salvar'),
               ),
             ],
-          ),
-          if (_mostrarMascote)
-            Positioned.fill(
-              child: IgnorePointer(
-                child: Center(
-                  child: SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.9,
-                    height: MediaQuery.of(context).size.width * 0.9,
-                    child: Image.asset(
-                      'assets/bolt/abertura_mascote.gif',
-                      fit: BoxFit.contain,
-                      filterQuality: FilterQuality.high,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
+  }
+
+  String get _title {
+    return switch (status) {
+      RunStatus.ready => 'Pronto para treinar?',
+      RunStatus.running => 'Corrida em andamento',
+      RunStatus.paused => 'Corrida pausada',
+    };
+  }
+
+  IconData _gpsIcon() {
+    return switch (gpsStatus) {
+      GpsStatus.checking => Icons.gps_not_fixed,
+      GpsStatus.ready => Icons.gps_fixed,
+      GpsStatus.permissionNeeded => Icons.location_disabled,
+      GpsStatus.serviceDisabled => Icons.gps_off,
+      GpsStatus.error => Icons.error_outline,
+    };
+  }
+
+  Color _gpsColor(ThemeData theme) {
+    return switch (gpsStatus) {
+      GpsStatus.checking => Colors.orange.shade700,
+      GpsStatus.ready => Colors.green.shade700,
+      GpsStatus.permissionNeeded ||
+      GpsStatus.serviceDisabled ||
+      GpsStatus.error => theme.colorScheme.error,
+    };
+  }
+
+  Color _panelColor(ThemeData theme) {
+    return switch (status) {
+      RunStatus.ready => Colors.green.shade50,
+      RunStatus.running => theme.colorScheme.primaryContainer,
+      RunStatus.paused => Colors.orange.shade50,
+    };
   }
 }

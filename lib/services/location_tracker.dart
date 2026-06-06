@@ -64,6 +64,7 @@ class LocationTracker {
               LocationUpdate(
                 sample: sample,
                 deltaMeters: 0,
+                instantSpeedMetersPerSecond: 0,
                 isAccepted: false,
                 statusMessage:
                     'GPS instavel: aguardando precisao melhor para somar km.',
@@ -76,8 +77,9 @@ class LocationTracker {
             _lastAcceptedPosition = position;
             controller.add(
               LocationUpdate(
-                sample: sample,
+                sample: sample.copyWith(speedMetersPerSecond: null),
                 deltaMeters: 0,
+                instantSpeedMetersPerSecond: 0,
                 isAccepted: true,
                 statusMessage: 'GPS calibrado. Pode iniciar o movimento.',
               ),
@@ -97,7 +99,9 @@ class LocationTracker {
                   .inMilliseconds
                   .abs() /
               1000;
-          final speedMetersPerSecond = seconds <= 0 ? 0 : deltaMeters / seconds;
+          final speedMetersPerSecond = seconds <= 0
+              ? 0.0
+              : deltaMeters / seconds;
           final requiredMovementMeters = math.max(
             _minMovementMeters,
             math.max(previous.accuracy, position.accuracy) * 0.7,
@@ -108,6 +112,7 @@ class LocationTracker {
               LocationUpdate(
                 sample: sample,
                 deltaMeters: 0,
+                instantSpeedMetersPerSecond: speedMetersPerSecond,
                 isAccepted: false,
                 statusMessage:
                     'Aguardando movimento real. Pequena variacao do GPS ignorada.',
@@ -121,6 +126,7 @@ class LocationTracker {
               LocationUpdate(
                 sample: sample,
                 deltaMeters: 0,
+                instantSpeedMetersPerSecond: speedMetersPerSecond,
                 isAccepted: false,
                 statusMessage: 'Salto de GPS ignorado para manter a precisao.',
               ),
@@ -129,10 +135,14 @@ class LocationTracker {
           }
 
           _lastAcceptedPosition = position;
+          final acceptedSample = sample.copyWith(
+            speedMetersPerSecond: speedMetersPerSecond,
+          );
           controller.add(
             LocationUpdate(
-              sample: sample,
+              sample: acceptedSample,
               deltaMeters: deltaMeters,
+              instantSpeedMetersPerSecond: speedMetersPerSecond,
               isAccepted: true,
               statusMessage:
                   'GPS ativo: ${position.accuracy.toStringAsFixed(0)} m',
@@ -160,7 +170,6 @@ class LocationTracker {
       recordedAt: position.timestamp,
       accuracy: position.accuracy,
       altitudeMeters: position.altitude,
-      speedMetersPerSecond: position.speed > 0 ? position.speed : null,
     );
   }
 }
@@ -169,12 +178,14 @@ class LocationUpdate {
   const LocationUpdate({
     required this.sample,
     required this.deltaMeters,
+    required this.instantSpeedMetersPerSecond,
     required this.isAccepted,
     required this.statusMessage,
   });
 
   final GeoSample sample;
   final double deltaMeters;
+  final double instantSpeedMetersPerSecond;
   final bool isAccepted;
   final String statusMessage;
 }

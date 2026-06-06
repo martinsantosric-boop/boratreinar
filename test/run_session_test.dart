@@ -1,5 +1,6 @@
 import 'package:cooper_maratonista/models/run_session.dart';
 import 'package:cooper_maratonista/models/geo_sample.dart';
+import 'package:cooper_maratonista/models/location_debug_log.dart';
 import 'package:cooper_maratonista/models/user_profile.dart';
 import 'package:cooper_maratonista/services/gamification_service.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -142,6 +143,38 @@ void main() {
     expect(restored.calculatedMaxSpeedKmh, 13.8);
     expect(restored.calculatedElevationGainMeters, 45);
     expect(restored.averageHeartRateBpm, 148);
+  });
+
+  test('run persists GPS debug logs for metric auditing', () {
+    final endedAt = DateTime(2026, 5, 30, 8);
+    final run = RunSession(
+      id: 'debug-run',
+      startedAt: endedAt.subtract(const Duration(minutes: 10)),
+      endedAt: endedAt,
+      duration: const Duration(minutes: 10),
+      distanceMeters: 1000,
+      route: const [],
+      locationDebugLogs: [
+        LocationDebugLog(
+          latitude: -23.0,
+          longitude: -46.0,
+          recordedAt: endedAt,
+          accuracy: 7,
+          instantSpeedMetersPerSecond: 2.8,
+          deltaMeters: 12,
+          accumulatedDistanceMeters: 540,
+          accepted: true,
+          message: 'GPS ativo: 7 m',
+        ),
+      ],
+    );
+
+    final restored = RunSession.fromJson(run.toJson());
+
+    expect(restored.locationDebugLogs, hasLength(1));
+    expect(restored.locationDebugLogs.first.deltaMeters, 12);
+    expect(restored.locationDebugLogs.first.accumulatedDistanceMeters, 540);
+    expect(restored.locationDebugLogs.first.accepted, isTrue);
   });
 
   test('run shorter than 30 minutes does not earn xp', () {

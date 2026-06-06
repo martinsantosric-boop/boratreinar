@@ -15,6 +15,24 @@ class GeoSample {
   final double? altitudeMeters;
   final double? speedMetersPerSecond;
 
+  GeoSample copyWith({
+    double? latitude,
+    double? longitude,
+    DateTime? recordedAt,
+    double? accuracy,
+    double? altitudeMeters,
+    double? speedMetersPerSecond,
+  }) {
+    return GeoSample(
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      recordedAt: recordedAt ?? this.recordedAt,
+      accuracy: accuracy ?? this.accuracy,
+      altitudeMeters: altitudeMeters ?? this.altitudeMeters,
+      speedMetersPerSecond: speedMetersPerSecond ?? this.speedMetersPerSecond,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'latitude': latitude,

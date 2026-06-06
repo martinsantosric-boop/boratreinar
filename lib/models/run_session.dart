@@ -1,4 +1,5 @@
 import 'geo_sample.dart';
+import 'location_debug_log.dart';
 
 class RunSession {
   const RunSession({
@@ -16,6 +17,7 @@ class RunSession {
     this.maxSpeedKmh,
     this.elevationGainMeters,
     this.averageHeartRateBpm,
+    this.locationDebugLogs = const [],
   });
 
   final String id;
@@ -32,6 +34,7 @@ class RunSession {
   final double? maxSpeedKmh;
   final double? elevationGainMeters;
   final int? averageHeartRateBpm;
+  final List<LocationDebugLog> locationDebugLogs;
 
   double get distanceKm => distanceMeters / 1000;
 
@@ -123,6 +126,9 @@ class RunSession {
       'maxSpeedKmh': maxSpeedKmh,
       'elevationGainMeters': elevationGainMeters,
       'averageHeartRateBpm': averageHeartRateBpm,
+      'locationDebugLogs': locationDebugLogs
+          .map((log) => log.toJson())
+          .toList(),
     };
   }
 
@@ -144,6 +150,12 @@ class RunSession {
       maxSpeedKmh: (json['maxSpeedKmh'] as num?)?.toDouble(),
       elevationGainMeters: (json['elevationGainMeters'] as num?)?.toDouble(),
       averageHeartRateBpm: (json['averageHeartRateBpm'] as num?)?.toInt(),
+      locationDebugLogs:
+          ((json['locationDebugLogs'] as List<dynamic>?) ?? const [])
+              .map(
+                (log) => LocationDebugLog.fromJson(log as Map<String, dynamic>),
+              )
+              .toList(),
     );
   }
 
