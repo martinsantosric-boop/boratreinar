@@ -150,10 +150,14 @@ class _HomeScreenState extends State<HomeScreen> {
         context,
         result,
         _gamificationState.currentLeague,
+        run,
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Corrida salva no historico.')),
+      await RewardsDialog.show(
+        context,
+        result,
+        _gamificationState.currentLeague,
+        run,
       );
     }
   }

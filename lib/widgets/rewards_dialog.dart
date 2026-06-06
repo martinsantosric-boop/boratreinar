@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 
 import '../models/league.dart';
+import '../models/run_session.dart';
 import '../services/gamification_service.dart';
+import '../utils/run_formatters.dart';
 import 'bolt_widget.dart';
 
 class RewardsDialog extends StatelessWidget {
@@ -9,10 +11,12 @@ class RewardsDialog extends StatelessWidget {
     super.key,
     required this.result,
     required this.currentLeague,
+    required this.run,
   });
 
   final GamificationResult result;
   final League currentLeague;
+  final RunSession run;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +57,10 @@ class RewardsDialog extends StatelessWidget {
 
               const SizedBox(height: 24),
 
+              _RunSummaryGrid(run: run),
+
+              const SizedBox(height: 16),
+
               // XP ganho
               Container(
                 padding: const EdgeInsets.all(16),
@@ -71,13 +79,11 @@ class RewardsDialog extends StatelessWidget {
                       children: [
                         Text(
                           '+${result.totalXpGained} XP',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
+                          style: Theme.of(context).textTheme.headlineMedium
                               ?.copyWith(
-                            fontWeight: FontWeight.w900,
-                            color: Colors.amber.shade900,
-                          ),
+                                fontWeight: FontWeight.w900,
+                                color: Colors.amber.shade900,
+                              ),
                         ),
                         Text(
                           'Experiência ganha',
@@ -96,10 +102,7 @@ class RewardsDialog extends StatelessWidget {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
-                      colors: [
-                        Colors.purple.shade100,
-                        Colors.blue.shade100,
-                      ],
+                      colors: [Colors.purple.shade100, Colors.blue.shade100],
                     ),
                     borderRadius: BorderRadius.circular(12),
                   ),
@@ -122,12 +125,8 @@ class RewardsDialog extends StatelessWidget {
                           const SizedBox(width: 12),
                           Text(
                             result.newLeague!.displayName,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
-                                ?.copyWith(
-                              fontWeight: FontWeight.w900,
-                            ),
+                            style: Theme.of(context).textTheme.headlineSmall
+                                ?.copyWith(fontWeight: FontWeight.w900),
                           ),
                         ],
                       ),
@@ -152,9 +151,8 @@ class RewardsDialog extends StatelessWidget {
                       const SizedBox(width: 8),
                       Text(
                         '${result.newStreak} dias seguidos!',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -282,6 +280,9 @@ class RewardsDialog extends StatelessWidget {
   }
 
   String _getTitle() {
+    if (!result.hasRewards) {
+      return 'Treino registrado!';
+    }
     if (result.leveledUp) {
       return 'Incrível! Você subiu de liga!';
     }
@@ -295,6 +296,9 @@ class RewardsDialog extends StatelessWidget {
   }
 
   String _getMessage() {
+    if (!result.hasRewards) {
+      return 'Esse treino ficou salvo no historico. Treinos com 30 minutos ou mais liberam XP e recompensas.';
+    }
     if (result.leveledUp) {
       return 'Continue assim e logo você estará no topo!';
     }
@@ -308,13 +312,99 @@ class RewardsDialog extends StatelessWidget {
     BuildContext context,
     GamificationResult result,
     League currentLeague,
+    RunSession run,
   ) {
     return showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (_) => RewardsDialog(
-        result: result,
-        currentLeague: currentLeague,
+      builder: (_) =>
+          RewardsDialog(result: result, currentLeague: currentLeague, run: run),
+    );
+  }
+}
+
+class _RunSummaryGrid extends StatelessWidget {
+  const _RunSummaryGrid({required this.run});
+
+  final RunSession run;
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.count(
+      crossAxisCount: 2,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 8,
+      childAspectRatio: 1.55,
+      children: [
+        _SummaryTile(
+          label: 'Distancia',
+          value: formatDistance(run.distanceMeters),
+          icon: Icons.route,
+        ),
+        _SummaryTile(
+          label: 'Tempo',
+          value: formatDuration(run.duration),
+          icon: Icons.timer_outlined,
+        ),
+        _SummaryTile(
+          label: 'Pace',
+          value: formatPace(run.paceSecondsPerKm),
+          icon: Icons.speed,
+        ),
+        _SummaryTile(
+          label: 'Passos',
+          value: '${run.estimatedSteps}',
+          icon: Icons.directions_walk,
+        ),
+      ],
+    );
+  }
+}
+
+class _SummaryTile extends StatelessWidget {
+  const _SummaryTile({
+    required this.label,
+    required this.value,
+    required this.icon,
+  });
+
+  final String label;
+  final String value;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: theme.colorScheme.primary, size: 20),
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.bodySmall,
+          ),
+        ],
       ),
     );
   }

@@ -68,7 +68,7 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 - [ ] Feedback do Bolt comemorando progresso.
 - [ ] Barra clara de progresso para proxima liga.
 - [ ] Mensagem quando a sequencia estiver em risco.
-- [ ] Tela de resumo pos-corrida com distancia, tempo, pace, XP, missoes e conquistas.
+- [x] Tela de resumo pos-corrida com distancia, tempo, pace, XP, missoes e conquistas.
 
 ### Mascote Bolt
 
