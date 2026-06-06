@@ -48,8 +48,8 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 
 ### Navegacao inferior mobile
 
-- [ ] Reduzir barra inferior para no maximo cinco destinos.
-- [ ] Mover Metas para dentro de Inicio ou Perfil.
+- [x] Reduzir barra inferior para no maximo cinco destinos.
+- [x] Mover Metas para dentro de Inicio ou Perfil.
 - [ ] Revisar textos e icones em telas pequenas.
 
 ### Ranking
@@ -87,10 +87,10 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 
 ### Metas
 
-- [ ] Adicionar botoes rapidos: 5 km, 10 km, 25 km e 42 km.
-- [ ] Adicionar botoes + e - para meta semanal.
-- [ ] Criar botao "Aplicar plano".
-- [ ] Explicar quantidade sugerida de treinos por semana em cada plano.
+- [x] Adicionar botoes rapidos: 5 km, 10 km, 25 km e 42 km.
+- [x] Adicionar botoes + e - para meta semanal.
+- [x] Criar botao "Aplicar plano".
+- [x] Explicar quantidade sugerida de treinos por semana em cada plano.
 
 ### Perfil
 

@@ -184,7 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _requestProfileData() {
-    setState(() => _selectedIndex = 5);
+    setState(() => _selectedIndex = 4);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
@@ -205,6 +205,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onStartRun: _startRun,
         onOpenProfile: () => setState(() => _selectedIndex = 4),
         onOpenAchievements: () => setState(() => _selectedIndex = 2),
+        onSaveGoal: _saveGoal,
       ),
       HistoryScreen(
         runs: _runs,
@@ -216,11 +217,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       AchievementsScreen(gamificationState: _gamificationState),
       RankingScreen(),
-      GoalsScreen(
-        runs: _runs,
-        weeklyGoalKm: _weeklyGoalKm,
-        onSaveGoal: _saveGoal,
-      ),
       ProfileScreen(profile: _profile, onSaveProfile: _saveProfile),
     ];
 
@@ -275,11 +271,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 label: 'Ranking',
               ),
               NavigationDestination(
-                icon: Icon(Icons.flag_outlined),
-                selectedIcon: Icon(Icons.flag),
-                label: 'Metas',
-              ),
-              NavigationDestination(
                 icon: Icon(Icons.person_outline),
                 selectedIcon: Icon(Icons.person),
                 label: 'Perfil',
@@ -302,6 +293,7 @@ class _DashboardTab extends StatelessWidget {
     required this.onStartRun,
     required this.onOpenProfile,
     required this.onOpenAchievements,
+    required this.onSaveGoal,
   });
 
   final List<RunSession> runs;
@@ -311,6 +303,7 @@ class _DashboardTab extends StatelessWidget {
   final VoidCallback onStartRun;
   final VoidCallback onOpenProfile;
   final VoidCallback onOpenAchievements;
+  final Future<void> Function(double goalKm) onSaveGoal;
 
   @override
   Widget build(BuildContext context) {
@@ -598,6 +591,13 @@ class _DashboardTab extends StatelessWidget {
                   icon: Icons.star,
                 ),
               ],
+            ),
+
+            const SizedBox(height: 16),
+            GoalsSection(
+              runs: runs,
+              weeklyGoalKm: weeklyGoalKm,
+              onSaveGoal: onSaveGoal,
             ),
 
             if (!hasUserProfile) ...[

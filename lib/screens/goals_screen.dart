@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../models/run_session.dart';
 import '../utils/run_formatters.dart';
 
-class GoalsScreen extends StatefulWidget {
+class GoalsScreen extends StatelessWidget {
   const GoalsScreen({
     super.key,
     required this.runs,
@@ -16,10 +16,40 @@ class GoalsScreen extends StatefulWidget {
   final Future<void> Function(double goalKm) onSaveGoal;
 
   @override
-  State<GoalsScreen> createState() => _GoalsScreenState();
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+      children: [
+        GoalsSection(
+          runs: runs,
+          weeklyGoalKm: weeklyGoalKm,
+          onSaveGoal: onSaveGoal,
+          showTitle: false,
+        ),
+      ],
+    );
+  }
 }
 
-class _GoalsScreenState extends State<GoalsScreen> {
+class GoalsSection extends StatefulWidget {
+  const GoalsSection({
+    super.key,
+    required this.runs,
+    required this.weeklyGoalKm,
+    required this.onSaveGoal,
+    this.showTitle = true,
+  });
+
+  final List<RunSession> runs;
+  final double weeklyGoalKm;
+  final Future<void> Function(double goalKm) onSaveGoal;
+  final bool showTitle;
+
+  @override
+  State<GoalsSection> createState() => _GoalsSectionState();
+}
+
+class _GoalsSectionState extends State<GoalsSection> {
   late double _goalKm;
 
   @override
@@ -29,7 +59,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
   }
 
   @override
-  void didUpdateWidget(covariant GoalsScreen oldWidget) {
+  void didUpdateWidget(covariant GoalsSection oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.weeklyGoalKm != widget.weeklyGoalKm) {
       _goalKm = widget.weeklyGoalKm;
@@ -48,9 +78,18 @@ class _GoalsScreenState extends State<GoalsScreen> {
         .where((run) => run.startedAt.isAfter(monthStart))
         .fold<double>(0, (sum, run) => sum + run.distanceKm);
 
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (widget.showTitle) ...[
+          Text(
+            'Metas',
+            style: Theme.of(
+              context,
+            ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 12),
+        ],
         Card(
           child: Padding(
             padding: const EdgeInsets.all(16),
@@ -78,10 +117,40 @@ class _GoalsScreenState extends State<GoalsScreen> {
                   label: '${_goalKm.toStringAsFixed(0)} km',
                   onChanged: (value) => setState(() => _goalKm = value),
                 ),
-                FilledButton.icon(
-                  onPressed: () => widget.onSaveGoal(_goalKm),
-                  icon: const Icon(Icons.save),
-                  label: const Text('Salvar meta'),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [5, 10, 25, 42].map((goal) {
+                    return ChoiceChip(
+                      label: Text('$goal km'),
+                      selected: _goalKm.round() == goal,
+                      onSelected: (_) =>
+                          setState(() => _goalKm = goal.toDouble()),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    IconButton.filledTonal(
+                      tooltip: 'Diminuir meta',
+                      onPressed: () => _adjustGoal(-1),
+                      icon: const Icon(Icons.remove),
+                    ),
+                    IconButton.filledTonal(
+                      tooltip: 'Aumentar meta',
+                      onPressed: () => _adjustGoal(1),
+                      icon: const Icon(Icons.add),
+                    ),
+                    FilledButton.icon(
+                      onPressed: () => widget.onSaveGoal(_goalKm),
+                      icon: const Icon(Icons.save),
+                      label: const Text('Salvar meta'),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -107,26 +176,40 @@ class _GoalsScreenState extends State<GoalsScreen> {
           ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 12),
-        const _PlanCard(
+        _PlanCard(
           title: '5K consistente',
           description: '3 treinos por semana com foco em criar rotina.',
           icon: Icons.looks_5,
+          targetKm: 5,
+          onApply: _applyPlan,
         ),
         const SizedBox(height: 12),
-        const _PlanCard(
+        _PlanCard(
           title: '10K evolutivo',
-          description:
-              'Alterna rodagens leves, ritmo e longo no fim de semana.',
+          description: '4 treinos por semana alternando leve, ritmo e longo.',
           icon: Icons.filter_9_plus,
+          targetKm: 10,
+          onApply: _applyPlan,
         ),
         const SizedBox(height: 12),
-        const _PlanCard(
+        _PlanCard(
           title: 'Meia maratona',
-          description: 'Prioriza volume semanal e pace controlado.',
+          description: '4 a 5 treinos por semana com volume progressivo.',
           icon: Icons.directions_run,
+          targetKm: 42,
+          onApply: _applyPlan,
         ),
       ],
     );
+  }
+
+  void _adjustGoal(double delta) {
+    setState(() => _goalKm = (_goalKm + delta).clamp(5, 120));
+  }
+
+  Future<void> _applyPlan(double targetKm) async {
+    setState(() => _goalKm = targetKm);
+    await widget.onSaveGoal(targetKm);
   }
 }
 
@@ -177,22 +260,58 @@ class _PlanCard extends StatelessWidget {
     required this.title,
     required this.description,
     required this.icon,
+    required this.targetKm,
+    required this.onApply,
   });
 
   final String title;
   final String description;
   final IconData icon;
+  final double targetKm;
+  final Future<void> Function(double targetKm) onApply;
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-          child: Icon(icon),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: Theme.of(
+                    context,
+                  ).colorScheme.secondaryContainer,
+                  child: Icon(icon),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(fontWeight: FontWeight.w800),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(description),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                onPressed: () => onApply(targetKm),
+                child: const Text('Aplicar plano'),
+              ),
+            ),
+          ],
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w800)),
-        subtitle: Text(description),
       ),
     );
   }
