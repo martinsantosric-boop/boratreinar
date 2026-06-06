@@ -29,13 +29,15 @@ class RewardsDialog extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               // Bolt comemorando
-              BoltWidget(
-                expression: result.leveledUp
-                    ? BoltExpression.trophy
-                    : BoltExpression.excited,
-                league: result.leveledUp ? result.newLeague : currentLeague,
-                size: 120,
-                showLeagueBadge: true,
+              _PopIn(
+                child: BoltWidget(
+                  expression: result.leveledUp
+                      ? BoltExpression.trophy
+                      : BoltExpression.excited,
+                  league: result.leveledUp ? result.newLeague : currentLeague,
+                  size: 120,
+                  showLeagueBadge: true,
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -405,6 +407,41 @@ class _SummaryTile extends StatelessWidget {
             style: theme.textTheme.bodySmall,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _PopIn extends StatefulWidget {
+  const _PopIn({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_PopIn> createState() => _PopInState();
+}
+
+class _PopInState extends State<_PopIn> {
+  var _visible = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _visible = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedScale(
+      scale: _visible ? 1 : 0.92,
+      duration: const Duration(milliseconds: 260),
+      curve: Curves.easeOutBack,
+      child: AnimatedOpacity(
+        opacity: _visible ? 1 : 0,
+        duration: const Duration(milliseconds: 220),
+        child: widget.child,
       ),
     );
   }

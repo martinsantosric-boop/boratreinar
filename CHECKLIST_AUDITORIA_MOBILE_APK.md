@@ -65,9 +65,9 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 - [ ] Animacao ao ganhar XP depois da corrida.
 - [ ] Animacao de missao concluida.
 - [ ] Animacao de conquista desbloqueada.
-- [ ] Feedback do Bolt comemorando progresso.
+- [x] Feedback do Bolt comemorando progresso.
 - [ ] Barra clara de progresso para proxima liga.
-- [ ] Mensagem quando a sequencia estiver em risco.
+- [x] Mensagem quando a sequencia estiver em risco.
 - [x] Tela de resumo pos-corrida com distancia, tempo, pace, XP, missoes e conquistas.
 
 ### Mascote Bolt
@@ -75,8 +75,8 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 - [x] Bolt como tutor na tela de corrida ativa.
 - [ ] Bolt celebrando missao concluida.
 - [ ] Bolt celebrando conquista desbloqueada.
-- [ ] Bolt alertando sequencia em risco.
-- [ ] Bolt com mensagens contextuais por progresso.
+- [x] Bolt alertando sequencia em risco.
+- [x] Bolt com mensagens contextuais por progresso.
 
 ### Conquistas
 

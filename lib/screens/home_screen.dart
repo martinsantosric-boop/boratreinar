@@ -574,6 +574,28 @@ class _DashboardTab extends StatelessWidget {
             ],
 
             // Resumo estatístico
+            if (_isStreakAtRisk()) ...[
+              Card(
+                color: Colors.red.shade50,
+                child: ListTile(
+                  leading: BoltWidget(
+                    expression: BoltExpression.fire,
+                    size: 54,
+                  ),
+                  title: const Text(
+                    'Sua sequencia esta em risco',
+                    style: TextStyle(fontWeight: FontWeight.w900),
+                  ),
+                  subtitle: const Text(
+                    'Bora fazer um treino leve hoje para manter o ritmo?',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: onStartRun,
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
             Text('Resumo', style: _sectionTitleStyle(context)),
             const SizedBox(height: 12),
             GridView.count(
@@ -674,6 +696,22 @@ class _DashboardTab extends StatelessWidget {
     } else {
       return 'Boa noite! Que tal um treino?';
     }
+  }
+
+  bool _isStreakAtRisk() {
+    final lastRunDate = gamificationState.lastRunDate;
+    if (gamificationState.currentStreak == 0 || lastRunDate == null) {
+      return false;
+    }
+
+    final today = DateTime.now();
+    final todayStart = DateTime(today.year, today.month, today.day);
+    final lastRunDay = DateTime(
+      lastRunDate.year,
+      lastRunDate.month,
+      lastRunDate.day,
+    );
+    return lastRunDay.isBefore(todayStart);
   }
 }
 
