@@ -219,7 +219,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onDeleteRun: _deleteRun,
         onSaveManualRun: _saveManualRun,
       ),
-      AchievementsScreen(gamificationState: _gamificationState),
+      AchievementsScreen(gamificationState: _gamificationState, runs: _runs),
       RankingScreen(),
       ProfileScreen(profile: _profile, onSaveProfile: _saveProfile),
     ];

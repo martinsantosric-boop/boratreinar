@@ -80,10 +80,10 @@ Este checklist acompanha as orientacoes da auditoria mobile/APK e deve ser atual
 
 ### Conquistas
 
-- [ ] Tela de detalhe ao tocar em uma conquista.
-- [ ] Mostrar recompensa de XP por conquista.
-- [ ] Separar conquistas por dificuldade/categoria.
-- [ ] Mostrar progresso parcial por conquista.
+- [x] Tela de detalhe ao tocar em uma conquista.
+- [x] Mostrar recompensa de XP por conquista.
+- [x] Separar conquistas por dificuldade/categoria.
+- [x] Mostrar progresso parcial por conquista.
 
 ### Metas
 
