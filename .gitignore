@@ -34,6 +34,7 @@ client_secret_*.json
 .pub-cache/
 .pub/
 /build/
+/coverage/
 
 # Symbolication related
 app.*.symbols
@@ -42,6 +43,7 @@ app.*.symbols
 app.*.map.json
 
 # Android Studio will place build artifacts here
+/android/.gradle/
 /android/app/debug
 /android/app/profile
 /android/app/release

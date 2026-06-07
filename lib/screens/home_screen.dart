@@ -16,10 +16,12 @@ import '../widgets/rewards_dialog.dart';
 import '../widgets/run_card.dart';
 import 'active_run_screen.dart';
 import 'achievements_screen.dart';
+import 'ai_coach_screen.dart';
 import 'goals_screen.dart';
 import 'history_screen.dart';
 import 'profile_screen.dart';
 import 'ranking_screen.dart';
+import 'test_animations_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key, this.welcomeUserId});
@@ -241,6 +243,28 @@ class _HomeScreenState extends State<HomeScreen> {
           appBar: AppBar(
             title: const Text('Cooper Maratonista'),
             actions: [
+              IconButton(
+                tooltip: 'Personal Trainer IA',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const AICoachScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.psychology),
+              ),
+              IconButton(
+                tooltip: 'Testar Animações',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const TestAnimationsScreen(),
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.video_library),
+              ),
               IconButton(
                 tooltip: 'Atualizar',
                 onPressed: _loadData,
