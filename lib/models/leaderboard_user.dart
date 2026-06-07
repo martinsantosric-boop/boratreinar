@@ -21,6 +21,27 @@ class LeaderboardUser {
   final int currentStreak;
   final String? avatarUrl;
 
+  LeaderboardUser copyWith({
+    int? position,
+    String? name,
+    int? xp,
+    League? league,
+    double? totalKm,
+    int? currentStreak,
+    String? avatarUrl,
+  }) {
+    return LeaderboardUser(
+      id: id,
+      position: position ?? this.position,
+      name: name ?? this.name,
+      xp: xp ?? this.xp,
+      league: league ?? this.league,
+      totalKm: totalKm ?? this.totalKm,
+      currentStreak: currentStreak ?? this.currentStreak,
+      avatarUrl: avatarUrl ?? this.avatarUrl,
+    );
+  }
+
   factory LeaderboardUser.fromJson(Map<String, dynamic> json) {
     final xp = (json['total_xp'] as num?)?.toInt() ?? 0;
 

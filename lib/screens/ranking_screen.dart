@@ -128,6 +128,7 @@ class _LeagueFilterBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
+      padding: const EdgeInsets.only(right: 16),
       child: Row(
         children: [
           Padding(
@@ -135,6 +136,7 @@ class _LeagueFilterBar extends StatelessWidget {
             child: FilterChip(
               label: const Text('Todas'),
               selected: selectedLeague == null,
+              visualDensity: VisualDensity.compact,
               onSelected: (_) => onChanged(null),
             ),
           ),
@@ -144,6 +146,7 @@ class _LeagueFilterBar extends StatelessWidget {
               child: FilterChip(
                 label: Text('${league.emoji} ${league.displayName}'),
                 selected: selectedLeague == league,
+                visualDensity: VisualDensity.compact,
                 onSelected: (_) => onChanged(league),
               ),
             );

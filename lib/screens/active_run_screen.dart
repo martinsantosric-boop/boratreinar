@@ -12,6 +12,7 @@ import '../services/location_tracker.dart';
 import '../services/run_storage_service.dart';
 import '../services/step_counter_service.dart';
 import '../utils/run_formatters.dart';
+import '../widgets/bolt_widget.dart';
 import '../widgets/metric_tile.dart';
 
 enum RunStatus { ready, running, paused }
@@ -284,25 +285,28 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Corrida ativa')),
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+          child: _RunActionPanel(
+            status: _status,
+            gpsStatus: _gpsStatus,
+            gpsMessage: _gpsMessage,
+            onStart: _gpsStatus == GpsStatus.ready ? _startWithMascote : null,
+            onPause: _pause,
+            onResume: _start,
+            onFinish: _finish,
+            onRetryGps: _prepareGps,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
             ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 260),
               children: [
-                _RunActionPanel(
-                  status: _status,
-                  gpsStatus: _gpsStatus,
-                  gpsMessage: _gpsMessage,
-                  onStart: _gpsStatus == GpsStatus.ready
-                      ? _startWithMascote
-                      : null,
-                  onPause: _pause,
-                  onResume: _start,
-                  onFinish: _finish,
-                  onRetryGps: _prepareGps,
-                ),
-                const SizedBox(height: 16),
                 Card(
                   color: Theme.of(context).colorScheme.primary,
                   child: Padding(
@@ -452,7 +456,10 @@ class _RunActionPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final gpsColor = _gpsColor(theme);
 
-    return Card(
+    return Material(
+      elevation: 8,
+      borderRadius: BorderRadius.circular(16),
+      shadowColor: Colors.black.withValues(alpha: 0.18),
       color: _panelColor(theme),
       child: Padding(
         padding: const EdgeInsets.all(18),
@@ -461,10 +468,11 @@ class _RunActionPanel extends StatelessWidget {
           children: [
             Row(
               children: [
-                CircleAvatar(
-                  backgroundColor: gpsColor.withValues(alpha: 0.14),
-                  foregroundColor: gpsColor,
-                  child: Icon(_gpsIcon()),
+                BoltWidget(
+                  expression: status == RunStatus.running
+                      ? BoltExpression.fire
+                      : BoltExpression.ready,
+                  size: 58,
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -477,12 +485,12 @@ class _RunActionPanel extends StatelessWidget {
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        gpsMessage,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.black.withValues(alpha: 0.72),
-                        ),
+                      const SizedBox(height: 6),
+                      _GpsStatusPill(
+                        gpsStatus: gpsStatus,
+                        gpsMessage: gpsMessage,
+                        gpsColor: gpsColor,
+                        gpsIcon: _gpsIcon(),
                       ),
                     ],
                   ),
@@ -587,6 +595,60 @@ class _RunActionPanel extends StatelessWidget {
       RunStatus.ready => Colors.green.shade50,
       RunStatus.running => theme.colorScheme.primaryContainer,
       RunStatus.paused => Colors.orange.shade50,
+    };
+  }
+}
+
+class _GpsStatusPill extends StatelessWidget {
+  const _GpsStatusPill({
+    required this.gpsStatus,
+    required this.gpsMessage,
+    required this.gpsColor,
+    required this.gpsIcon,
+  });
+
+  final GpsStatus gpsStatus;
+  final String gpsMessage;
+  final Color gpsColor;
+  final IconData gpsIcon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
+      decoration: BoxDecoration(
+        color: gpsColor.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: gpsColor.withValues(alpha: 0.35)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(gpsIcon, color: gpsColor, size: 18),
+          const SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              _label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: gpsColor,
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String get _label {
+    return switch (gpsStatus) {
+      GpsStatus.checking => 'Buscando GPS',
+      GpsStatus.ready => gpsMessage,
+      GpsStatus.permissionNeeded => 'Permissao necessaria',
+      GpsStatus.serviceDisabled => 'GPS desligado',
+      GpsStatus.error => 'Erro no GPS',
     };
   }
 }

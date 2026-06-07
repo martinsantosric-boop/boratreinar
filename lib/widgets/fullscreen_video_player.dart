@@ -82,12 +82,16 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Vídeo centralizado
+          // Vídeo preenchendo toda a tela (sem barras pretas)
           if (_isInitialized && !_hasError)
-            Center(
-              child: AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
+            SizedBox.expand(
+              child: FittedBox(
+                fit: BoxFit.cover, // Preenche toda a tela, cortando se necessário
+                child: SizedBox(
+                  width: _controller.value.size.width,
+                  height: _controller.value.size.height,
+                  child: VideoPlayer(_controller),
+                ),
               ),
             ),
 
