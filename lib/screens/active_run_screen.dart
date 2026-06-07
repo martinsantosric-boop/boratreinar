@@ -109,10 +109,11 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
 
   Future<void> _executarAberturaMascote() async {
     setState(() => _mostrarMascote = true);
+    await WidgetsBinding.instance.endOfFrame;
 
     if (_apitoPlayer != null) {
       try {
-        await _apitoPlayer.play(AssetSource('apito.mp3'));
+        unawaited(_apitoPlayer.play(AssetSource('apito.mp3')));
       } catch (e) {
         debugPrint('Erro ao tocar apito: $e');
       }
@@ -285,22 +286,26 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Corrida ativa')),
-      bottomNavigationBar: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
-          child: _RunActionPanel(
-            status: _status,
-            gpsStatus: _gpsStatus,
-            gpsMessage: _gpsMessage,
-            onStart: _gpsStatus == GpsStatus.ready ? _startWithMascote : null,
-            onPause: _pause,
-            onResume: _start,
-            onFinish: _finish,
-            onRetryGps: _prepareGps,
-          ),
-        ),
-      ),
+      bottomNavigationBar: _mostrarMascote
+          ? null
+          : SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(12, 6, 12, 12),
+                child: _RunActionPanel(
+                  status: _status,
+                  gpsStatus: _gpsStatus,
+                  gpsMessage: _gpsMessage,
+                  onStart: _gpsStatus == GpsStatus.ready
+                      ? _startWithMascote
+                      : null,
+                  onPause: _pause,
+                  onResume: _start,
+                  onFinish: _finish,
+                  onRetryGps: _prepareGps,
+                ),
+              ),
+            ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -337,6 +342,12 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
                       ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 16),
+                _RunCoachCard(
+                  status: _status,
+                  gpsStatus: _gpsStatus,
+                  message: _message,
                 ),
                 const SizedBox(height: 16),
                 GridView.count(
@@ -408,22 +419,128 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
               ],
             ),
             if (_mostrarMascote)
-              Positioned.fill(
-                child: IgnorePointer(
-                  child: Center(
-                    child: SizedBox(
-                      width: MediaQuery.of(context).size.width * 0.9,
-                      height: MediaQuery.of(context).size.width * 0.9,
-                      child: Image.asset(
-                        'assets/bolt/abertura_mascote.gif',
-                        fit: BoxFit.contain,
-                        filterQuality: FilterQuality.high,
-                      ),
-                    ),
+              const Positioned.fill(child: _StartMascotOverlay()),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _RunCoachCard extends StatelessWidget {
+  const _RunCoachCard({
+    required this.status,
+    required this.gpsStatus,
+    required this.message,
+  });
+
+  final RunStatus status;
+  final GpsStatus gpsStatus;
+  final String? message;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          children: [
+            BoltWidget(expression: _expression, size: 118),
+            const SizedBox(height: 12),
+            Text(
+              _title,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w900,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              message ?? _subtitle,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.black.withValues(alpha: 0.68),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  BoltExpression get _expression {
+    return switch (status) {
+      RunStatus.running => BoltExpression.fire,
+      RunStatus.paused => BoltExpression.ready,
+      RunStatus.ready =>
+        gpsStatus == GpsStatus.ready
+            ? BoltExpression.excited
+            : BoltExpression.ready,
+    };
+  }
+
+  String get _title {
+    return switch (status) {
+      RunStatus.ready =>
+        gpsStatus == GpsStatus.ready
+            ? 'Tudo pronto para largar'
+            : 'Preparando sua corrida',
+      RunStatus.running => 'Estou acompanhando seu treino',
+      RunStatus.paused => 'Treino pausado',
+    };
+  }
+
+  String get _subtitle {
+    return switch (status) {
+      RunStatus.ready => 'Quando o GPS estiver pronto, use o botao embaixo.',
+      RunStatus.running => 'Mantenha o ritmo e acompanhe as metricas.',
+      RunStatus.paused => 'Retome ou finalize quando quiser.',
+    };
+  }
+}
+
+class _StartMascotOverlay extends StatelessWidget {
+  const _StartMascotOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+
+    return IgnorePointer(
+      child: AnimatedOpacity(
+        opacity: 1,
+        duration: const Duration(milliseconds: 180),
+        child: Container(
+          color: Colors.black.withValues(alpha: 0.72),
+          alignment: Alignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: size.width * 0.82,
+                height: size.width * 0.82,
+                child: Image.asset(
+                  'assets/bolt/abertura_mascote.gif',
+                  fit: BoxFit.contain,
+                  filterQuality: FilterQuality.high,
+                  errorBuilder: (_, __, ___) => const BoltWidget(
+                    expression: BoltExpression.excited,
+                    size: 180,
                   ),
                 ),
               ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                'Bora treinar!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -468,11 +585,10 @@ class _RunActionPanel extends StatelessWidget {
           children: [
             Row(
               children: [
-                BoltWidget(
-                  expression: status == RunStatus.running
-                      ? BoltExpression.fire
-                      : BoltExpression.ready,
-                  size: 58,
+                CircleAvatar(
+                  backgroundColor: gpsColor.withValues(alpha: 0.14),
+                  foregroundColor: gpsColor,
+                  child: Icon(_gpsIcon()),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -499,13 +615,6 @@ class _RunActionPanel extends StatelessWidget {
             ),
             const SizedBox(height: 14),
             if (status == RunStatus.ready) ...[
-              Text(
-                'O Bolt vai esperar o GPS ficar pronto. Quando aparecer verde, toque em Iniciar corrida.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.black.withValues(alpha: 0.64),
-                ),
-              ),
-              const SizedBox(height: 14),
               FilledButton.icon(
                 onPressed: onStart,
                 icon: const Icon(Icons.play_arrow, size: 26),
