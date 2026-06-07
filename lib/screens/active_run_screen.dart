@@ -317,7 +317,7 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
         child: Stack(
           children: [
             ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 260),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 210),
               children: [
                 Card(
                   color: Theme.of(context).colorScheme.primary,
@@ -586,8 +586,9 @@ class _RunActionPanel extends StatelessWidget {
       shadowColor: Colors.black.withValues(alpha: 0.18),
       color: _panelColor(theme),
       child: Padding(
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(14),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Row(
