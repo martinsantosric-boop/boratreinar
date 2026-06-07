@@ -102,15 +102,28 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
   }
 
   Future<void> _startWithMascote() async {
-    await _executarAberturaMascote();
-    if (!mounted) return;
-    await _start();
-  }
+    if (_mostrarMascote) return;
 
-  Future<void> _executarAberturaMascote() async {
     setState(() => _mostrarMascote = true);
     await WidgetsBinding.instance.endOfFrame;
 
+    _playStartSound();
+
+    final minimumAnimationTime = Future<void>.delayed(
+      const Duration(milliseconds: 1400),
+    );
+
+    try {
+      await _start();
+    } finally {
+      await minimumAnimationTime;
+      if (mounted) {
+        setState(() => _mostrarMascote = false);
+      }
+    }
+  }
+
+  void _playStartSound() {
     if (_apitoPlayer != null) {
       try {
         unawaited(_apitoPlayer.play(AssetSource('apito.mp3')));
@@ -118,12 +131,6 @@ class _ActiveRunScreenState extends State<ActiveRunScreen> {
         debugPrint('Erro ao tocar apito: $e');
       }
     }
-
-    await Future.delayed(const Duration(seconds: 3));
-
-    if (!mounted) return;
-
-    setState(() => _mostrarMascote = false);
   }
 
   Future<void> _start() async {
